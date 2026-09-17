@@ -541,14 +541,15 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
       line('<span class="dim">Receiving objects: 100%, done.</span>');
       await wait(400);
       await type('cargo build --release');
-      const crates = ['tokio', 'serde', 'reqwest', 'ratatui', 'crossterm', 'rusqlite', 'ort', 'sherpa-rs', 'rmcp'];
+      // 都是 gqy-agent 的 Cargo.toml 里真实的依赖
+      const crates = ['serde v1.0', 'tokio v1.38', 'clap v4.5', 'crossterm v0.28', 'ratatui v0.30', 'reqwest v0.12', 'axum v0.8', 'rusqlite v0.32', 'ort v2.0.0-rc.13'];
       for (const c of crates) {
-        line(`   <span class="ok">Compiling</span> ${esc(c)} v${1 + ((Math.random() * 3) | 0)}.${(Math.random() * 20) | 0}.${(Math.random() * 9) | 0}`);
+        line(`   <span class="ok">Compiling</span> ${esc(c)}`);
         await wait(120 + Math.random() * 180);
       }
       line('   <span class="ok">Compiling</span> gqy v0.6.0 (~/gqy-agent)');
       await wait(1300);
-      line('    <span class="ok">Finished</span> `release` profile [optimized]');
+      line('    <span class="ok">Finished</span> `release` profile [optimized] target(s)');
       await wait(600);
       await type('gqy');
       await wait(500);
