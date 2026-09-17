@@ -463,6 +463,25 @@ a { color: inherit; }
 .note-qy figcaption { color: var(--qing); letter-spacing: .3em; }
 .note-qy figcaption::before { content: "—— "; letter-spacing: 0; }
 
+/* ───────── 客人 ───────── */
+
+.guest {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 56px 20px;
+  color: var(--ink-dim);
+  font-size: 15px;
+  line-height: 1.9;
+}
+.guest img { flex: none; width: 48px; height: 48px; border-radius: 50%; margin-top: 4px; }
+.guest p { margin: 0; }
+.guest-sign { margin-top: 8px !important; font-size: 14px; }
+.guest-sign a { color: #b0583c; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+
 /* ───────── 页脚 ───────── */
 
 .foot {
