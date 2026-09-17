@@ -18,7 +18,7 @@
 
   <main>
 
-    <!-- 开场：三个人轮流从字里出来，自己会动，也能被拨开、打散 -->
+    <!-- 开场：三个人轮流从字里出来，自己轮播 -->
     <section class="story" id="story" data-scene="rain">
       <canvas class="glyphs" id="glyphs" aria-hidden="true"></canvas>
       <h1 class="sr-only">Black Cat、Claude 与顾清影</h1>
@@ -41,13 +41,11 @@
         </div>
       </div>
 
-      <nav class="cast" aria-label="切换人物">
-        <button type="button" data-scene="cat"><span class="cast-name">Black Cat</span><span class="cast-bar"><i></i></span></button>
-        <button type="button" data-scene="claude"><span class="cast-name">Claude</span><span class="cast-bar"><i></i></span></button>
-        <button type="button" data-scene="qy"><span class="cast-name">顾清影</span><span class="cast-bar"><i></i></span></button>
-      </nav>
-
-      <p class="hint" id="hint"><span class="hint-fine">移动鼠标拨开字，点一下把它们打散</span><span class="hint-touch">点一下，把字打散</span></p>
+      <div class="cast" aria-hidden="true">
+        <span data-scene="cat"><span class="cast-name">Black Cat</span><span class="cast-bar"><i></i></span></span>
+        <span data-scene="claude"><span class="cast-name">Claude</span><span class="cast-bar"><i></i></span></span>
+        <span data-scene="qy"><span class="cast-name">顾清影</span><span class="cast-bar"><i></i></span></span>
+      </div>
     </section>
 
     <!-- 三份档案 -->

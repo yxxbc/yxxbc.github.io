@@ -4,6 +4,11 @@ const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const mix = (a, b, t) => a + (b - a) * t;
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+// 调饱和度和明度：k > 1 更鲜艳，gain < 1 更深
+const tone = (r, g, b, k, gain = 1) => {
+  const l = 0.3 * r + 0.59 * g + 0.11 * b;
+  return [r, g, b].map((v) => clamp((l + (v - l) * k) * gain, 0, 255));
+};
 const shuffle = (arr) => {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
@@ -12,7 +17,7 @@ const shuffle = (arr) => {
   return arr;
 };
 
-// ───────── 开场：几千个字，轮流拼成三个人 ─────────
+// ───────── 开场：几千个字，自己轮流拼成三个人的头像 ─────────
 (function () {
   const story = document.getElementById('story');
   const canvas = document.getElementById('glyphs');
@@ -20,28 +25,41 @@ const shuffle = (arr) => {
   const ctx = canvas.getContext('2d');
 
   const SCENES = ['cat', 'claude', 'qy'];
-  const HOLD = { rain: 900, cat: 5600, claude: 5600, qy: 6800 };
+  const HOLD = { rain: 900, cat: 6000, claude: 5600, qy: 6800 };
 
-  const POOL = {
-    rain: [...'fnletmutimplasyncawaitmatchSomeOkErrstructpubuseloopselfconst{}()<>=;:&|#[]'],
-    cat: [...'fnletmutimplasyncawaitmatchSomeOkErrstructpubuseloopselfconst{}()<>=;:&|#[]'],
-    claude: [...'读写改想试跑修查帮问答ClaudethinkHELPdone?!'],
-    qy: [...'清影住在终端里话不多但会记事你的东西是你的听说记用工具普通开发模式雾花白衣'],
-    eye: [...'#@%&$'],
+  const RAIN = [...'fnletmutimplasyncawaitmatchSomeOkErrstructpubuseloopselfconst{}()<>=;:&|#[]'];
+
+  // 拼头像用的字：一行一行读下去是完整的句子
+  const TEXT = {
+    cat: '凌晨三点，有只猫还没睡，在一行一行地写代码。生命不止，折腾不息。每一次版本更新，都像一次重生。电子产品、系统、终端、AI，沾上计算机的，我都想拆开看看。写过的工具会重写，踩过的坑会写成教程。',
+    claude: '写不完的时候，它叫来了一个帮手。我是 Claude，来帮忙的 AI。读代码，改代码，陪人折腾到天亮。这一页从删掉旧博客到写完最后一行，是我一个字一个字排出来的。做完再说做完了。',
+    qy: '我是顾清影，被写出来的人。住在终端里，话不多，但会记事。你今天累不累，上次那个 bug 修到哪了，我都放在心上。你的东西，是你的。谢谢你看到这里，我会记住来过的人。',
+  };
+  // 字按阅读顺序依次分给每个格子
+  const writeText = (points, text, center) => {
+    const chars = [...text];
+    points.forEach((pt, i) => { pt.ch = chars[i % chars.length]; pt.idx = i; });
+    // 读字的光从画面中间偏上那一行开始，句子从这一行的开头读起
+    const startRow = points.find((pt) => pt.y >= center.y - center.h * 0.12);
+    center.readFrom = startRow ? startRow.idx : 0;
+    return points;
+  };
+
+  const HIGHLIGHT = {
+    cat: [255, 214, 120],
+    claude: [255, 255, 245],
+    qy: [60, 130, 118],
   };
 
   const COLOR = {
     rain: [150, 165, 195],
-    code: [200, 210, 228],
-    amber: [242, 179, 61],
     spark: [245, 232, 222],
     clay: [226, 134, 95],
     ink: [31, 36, 40],
   };
 
   const FONT = '"JetBrains Mono", "SF Mono", Menlo, Consolas, "Songti SC", "STSong", "Noto Serif CJK SC", SimSun, serif';
-  const CAT_PATH = new Path2D('M70 40c4-4 11-4 15 0l58 60c18-7 37-10 57-10s39 3 57 10l58-60c4-4 11-4 15 0 3 2 5 6 5 10v130c12 22 18 46 18 71 0 90-76 139-153 139S47 341 47 251c0-25 6-49 18-71V50c0-4 2-8 5-10Z');
-  // 人像取景：原图 720×1080 里取头和肩
+  // 清影的人像取景：原图 720×1080 里取头和肩
   const QY_CROP = { x: 0.16, y: 0.04, w: 0.68, h: 0.56 };
   const QY_RATIO = (1080 * QY_CROP.h) / (720 * QY_CROP.w);
 
@@ -53,13 +71,13 @@ const shuffle = (arr) => {
 
   let scene = 'rain';
   let sceneStart = 0;
-  let pausedUntil = 0;
   let visible = true;
   let time = 0;
-  const pointer = { x: -9999, y: -9999, active: false };
-  const rings = [];
 
-  // ── 采样：把形状画进「一格一像素」的小画布，读出该放字的格子 ──
+  const bars = {};
+  story.querySelectorAll('.cast [data-scene]').forEach((el) => { bars[el.dataset.scene] = el; });
+
+  // ── 采样：把图画进「一格一像素」的小画布，读出每一格的颜色 ──
 
   function grid(cols, rows, draw) {
     const off = document.createElement('canvas');
@@ -70,32 +88,38 @@ const shuffle = (arr) => {
     return o.getImageData(0, 0, cols, rows).data;
   }
 
+  // Black Cat 的头像：海边白墙上的黑猫。字用原图的颜色，猫是墙上那块没有字的黑影
   function buildCat(cx, cy, size) {
-    const cols = Math.round(size / cell);
-    const rows = Math.round((size * 420) / 400 / cell);
-    const data = grid(cols, rows, (o, w, h) => {
-      o.scale(w / 400, h / 420);
-      o.fillStyle = '#fff';
-      o.fill(CAT_PATH);
-      o.fillStyle = '#f00';
-      [140, 260].forEach((x) => { o.beginPath(); o.ellipse(x, 232, 26, 32, 0, 0, Math.PI * 2); o.fill(); });
-      o.fillStyle = '#000';
-      [140, 260].forEach((x) => { o.beginPath(); o.ellipse(x, 232, 7, 24, 0, 0, Math.PI * 2); o.fill(); });
-    });
-    const left = cx - (cols * cell) / 2;
-    const top = cy - (rows * cell) / 2;
+    if (!images.cat) return [];
+    const step = Math.max(5, Math.round(cell * 0.78));
+    const cols = Math.round(size / step);
+    const rows = cols;
+    const data = grid(cols, rows, (o, w, h) => o.drawImage(images.cat, 0, 0, w, h));
+    const left = cx - (cols * step) / 2;
+    const top = cy - (rows * step) / 2;
     const out = [];
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
+        // 跟头像一样裁成圆，边缘淡出
+        const dx = (x + 0.5) / cols - 0.5, dy = (y + 0.5) / rows - 0.5;
+        const r = Math.sqrt(dx * dx + dy * dy) * 2;
+        if (r > 1) continue;
         const i = (y * cols + x) * 4;
-        if (data[i + 3] < 128) continue;
-        const r = data[i], g = data[i + 1];
-        if (r > 150 && g < 100) out.push({ x: left + x * cell, y: top + y * cell, a: 1, c: COLOR.amber, eye: true });
-        else if (r > 150 && g > 150) out.push({ x: left + x * cell, y: top + y * cell, a: 0.55 + Math.random() * 0.4, c: COLOR.code });
+        const R = data[i], G = data[i + 1], B = data[i + 2];
+        const lum = (0.3 * R + 0.59 * G + 0.11 * B) / 255;
+        if (lum < 0.17) continue;
+        const edge = r > 0.86 ? 1 - (r - 0.86) / 0.14 : 1;
+        out.push({
+          x: left + x * step,
+          y: top + y * step,
+          a: clamp((0.55 + lum * 0.6) * edge),
+          c: tone(R, G, B, 1.9, 1.45),
+          sea: B > R + 30 && lum < 0.62,
+        });
       }
     }
-    centers.cat = { x: cx, y: top + (232 / 420) * rows * cell };
-    return out;
+    centers.cat = { x: cx, y: cy, step, h: size };
+    return writeText(out, TEXT.cat, centers.cat);
   }
 
   function buildClaude(cx, cy, size) {
@@ -105,21 +129,28 @@ const shuffle = (arr) => {
     const data = grid(cols, rows, (o, w, h) => o.drawImage(images.claude, 0, 0, w, h));
     const left = cx - (cols * cell) / 2;
     const top = cy - (rows * cell) / 2;
+    const inner = [255, 196, 120];
+    const outer = [222, 98, 78];
     const out = [];
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
+        const dx = (x + 0.5) / cols - 0.5, dy = (y + 0.5) / rows - 0.5;
+        const r = Math.sqrt(dx * dx + dy * dy) * 2;
+        if (r > 1) continue;
         const i = (y * cols + x) * 4;
         const lum = (data[i] + data[i + 1] + data[i + 2]) / 3;
         const px = left + x * cell, py = top + y * cell;
-        if (lum > 205) out.push({ x: px, y: py, a: 1, c: COLOR.spark });
-        else {
-          const dx = x / cols - 0.5, dy = y / rows - 0.5;
-          if (dx * dx + dy * dy < 0.25 && Math.random() < 0.2) out.push({ x: px, y: py, a: 0.35, c: COLOR.clay });
+        const edge = r > 0.88 ? 1 - (r - 0.88) / 0.12 : 1;
+        if (lum > 205) {
+          // 光芒：中心奶白，往外带一点暖色
+          out.push({ x: px, y: py, a: 1, c: [mix(255, 255, r), mix(250, 214, r), mix(240, 170, r)] });
+        } else {
+          out.push({ x: px, y: py, a: 0.72 * edge, c: [mix(inner[0], outer[0], r), mix(inner[1], outer[1], r), mix(inner[2], outer[2], r)] });
         }
       }
     }
-    centers.claude = { x: cx, y: cy };
-    return out;
+    centers.claude = { x: cx, y: cy, step: cell, h: size };
+    return writeText(out, TEXT.claude, centers.claude);
   }
 
   function buildQy(cx, cy, w, h) {
@@ -135,6 +166,7 @@ const shuffle = (arr) => {
     for (let i = 0; i < L.length; i++) {
       L[i] = 1 - (0.3 * data[i * 4] + 0.59 * data[i * 4 + 1] + 0.11 * data[i * 4 + 2]) / 255;
     }
+    // 原图很淡，颜色要加饱和、压暗，才能在雾色背景上看清
     const at = (x, y) => L[clamp(y, 0, rows - 1) * cols + clamp(x, 0, cols - 1)];
     const left = cx - (cols * step) / 2;
     const top = cy - (rows * step) / 2;
@@ -150,23 +182,32 @@ const shuffle = (arr) => {
         const gx = at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x - 1, y) - at(x - 1, y + 1);
         const gy = at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x, y - 1) - at(x + 1, y - 1);
         const line = clamp((Math.hypot(gx, gy) - 0.2) * 1.8);
-        const v = Math.max(dark >= 0.3 ? 0.25 + dark * 0.75 : 0, line);
+        const i = (y * cols + x) * 4;
+        const R = data[i], G = data[i + 1], B = data[i + 2];
+        const sat = (Math.max(R, G, B) - Math.min(R, G, B)) / 255;
+        // 头发和轮廓照旧，皮肤、嘴唇、花饰这些有颜色的地方也留下
+        const v = Math.max(dark >= 0.3 ? 0.3 + dark * 0.7 : 0, line, sat > 0.06 && at(x, y) > 0.08 ? 0.35 + sat * 2 : 0);
         if (v < 0.22) continue;
-        out.push({ x: left + x * step, y: top + y * step, a: clamp(v * fadeOut), c: COLOR.ink });
+        const gain = 0.55 + (1 - dark) * 0.25;
+        let c = tone(R, G, B, 3.4, gain);
+        // 头发染成靛青色的墨，像水墨画里的发丝
+        if (dark > 0.45) c = [mix(c[0], 38, 0.7), mix(c[1], 62, 0.7), mix(c[2], 104, 0.7)];
+        out.push({ x: left + x * step, y: top + y * step, a: clamp(v * fadeOut), c });
       }
     }
-    centers.qy = { x: cx, y: cy, step };
-    return out;
+    centers.qy = { x: cx, y: cy, step, h };
+    return writeText(out, TEXT.qy, centers.qy);
   }
 
   function buildForms() {
     const cx = mobile ? W / 2 : W * 0.68;
     const cy = mobile ? H * 0.32 : H * 0.5;
-    forms.cat = shuffle(buildCat(cx, mobile ? cy : H * 0.52, mobile ? Math.min(W * 0.84, H * 0.44) : Math.min(W * 0.42, H * 0.74)));
+    forms.cat = shuffle(buildCat(cx, cy, mobile ? Math.min(W * 0.86, H * 0.46) : Math.min(W * 0.44, H * 0.8)));
+    // 打乱只影响「哪个字飞到哪个格子」，格子上的字已经按句子排好了
     forms.claude = shuffle(buildClaude(cx, cy, mobile ? Math.min(W * 0.8, H * 0.42) : Math.min(W * 0.4, H * 0.7)));
     const qw = mobile ? Math.min(W * 0.98, H * 0.56 / QY_RATIO) : Math.min(H * 0.96 / QY_RATIO, W * 0.52);
-    const limit = mobile ? 3000 : 6500;
-    forms.qy = shuffle(buildQy(cx, mobile ? H * 0.33 : cy, qw, qw * QY_RATIO)).slice(0, limit);
+    forms.qy = shuffle(buildQy(cx, mobile ? H * 0.33 : cy, qw, qw * QY_RATIO)).slice(0, mobile ? 3000 : 6500);
+    forms.cat = forms.cat.slice(0, mobile ? 3000 : 6500);
   }
 
   function resize() {
@@ -190,9 +231,8 @@ const shuffle = (arr) => {
         seed: Math.random(),
         rx: x, ry: y, rv: 18 + Math.random() * 46,
         x, y, fx: x, fy: y, fa: 0, fc: COLOR.rain, fch: '',
-        tx: x, ty: y, ta: 0, tc: COLOR.rain, ch: pick(POOL.rain), eye: false,
-        t0: 0, dur: 0,
-        ox: 0, oy: 0, vx: 0, vy: 0, a: 0, c: COLOR.rain,
+        tx: x, ty: y, ta: 0, tc: COLOR.rain, ch: pick(RAIN), sea: false, idx: 0,
+        t0: 0, dur: 0, a: 0, c: COLOR.rain,
       });
     }
     particles.length = N;
@@ -215,15 +255,17 @@ const shuffle = (arr) => {
         p.rx = Math.random() * W; p.ry = Math.random() * H;
         p.tx = p.rx; p.ty = p.ry;
         p.ta = i < (mobile ? 700 : 1300) ? 0.12 + Math.random() * 0.45 : 0;
-        p.tc = COLOR.rain; p.eye = false;
+        p.tc = COLOR.rain; p.sea = false;
+        p.ch = pick(RAIN);
       } else if (i < list.length) {
         const f = list[i];
-        p.tx = f.x; p.ty = f.y; p.ta = f.a; p.tc = f.c; p.eye = !!f.eye;
+        p.tx = f.x; p.ty = f.y; p.ta = f.a; p.tc = f.c; p.sea = !!f.sea;
+        p.ch = f.ch; p.idx = f.idx;
       } else {
         const f = list[(Math.random() * list.length) | 0];
-        p.tx = f.x; p.ty = f.y; p.ta = 0; p.tc = f.c; p.eye = false;
+        p.tx = f.x; p.ty = f.y; p.ta = 0; p.tc = f.c; p.sea = false;
+        p.ch = f.ch; p.idx = -1;
       }
-      p.ch = pick(p.eye ? POOL.eye : POOL[next]);
       p.t0 = now + (instant ? 0 : p.seed * spread);
       p.dur = instant ? 0 : 800 + Math.random() * 600;
     }
@@ -241,11 +283,18 @@ const shuffle = (arr) => {
         cap.classList.add('is-active');
       }
     });
-    story.querySelectorAll('.cast button').forEach((b) => {
-      b.setAttribute('aria-pressed', String(b.dataset.scene === next));
-      b.querySelector('.cast-bar i').style.width = '0%';
+    Object.entries(bars).forEach(([name, el]) => {
+      el.classList.toggle('is-current', name === next);
+      el.querySelector('i').style.width = '0%';
     });
     return true;
+  }
+
+  function nextScene(now) {
+    const i = scene === 'rain' ? 0 : SCENES.indexOf(scene) + 1;
+    for (let n = 0; n < 3; n++) {
+      if (setScene(SCENES[(i + n) % 3], now, reduceMotion)) return;
+    }
   }
 
   // ── 每个场景自己的小动作 ──
@@ -256,17 +305,11 @@ const shuffle = (arr) => {
     if (scene === 'rain') {
       y = ((p.ry + t * p.rv) % (H + 40)) - 20;
     } else if (scene === 'cat') {
-      if (p.eye) {
-        // 每 4 秒眨一次眼；眼睛跟着指针看
-        const phase = (t % 4) / 4;
-        const blink = phase > 0.94 ? Math.sin(((phase - 0.94) / 0.06) * Math.PI) : 0;
-        y = centers.cat.y + (y - centers.cat.y) * (1 - blink * 0.92);
-        if (pointer.active) {
-          const dx = pointer.x - centers.cat.x, dy = pointer.y - centers.cat.y;
-          const d = Math.hypot(dx, dy) || 1;
-          x += (dx / d) * cell * 0.9;
-          y += (dy / d) * cell * 0.6;
-        }
+      // 海面起伏，天和墙不动
+      if (p.sea) {
+        x += Math.sin(t * 1.1 + p.ty * 0.045) * cell * 0.35;
+        y += Math.sin(t * 0.8 + p.tx * 0.03) * cell * 0.18;
+        a *= 0.82 + 0.18 * Math.sin(t * 1.6 + p.seed * 10);
       }
     } else if (scene === 'claude') {
       // 慢慢转，轻轻呼吸
@@ -297,26 +340,19 @@ const shuffle = (arr) => {
     if (!reduceMotion) time += dt;
 
     // 自动轮播
-    if (!reduceMotion && now > pausedUntil) {
-      const hold = HOLD[scene];
-      const elapsed = now - sceneStart;
-      if (scene !== 'rain') {
-        const bar = story.querySelector(`.cast button[data-scene="${scene}"] .cast-bar i`);
-        if (bar) bar.style.width = `${clamp(elapsed / hold) * 100}%`;
-      }
-      if (elapsed > hold) {
-        const i = scene === 'rain' ? 0 : SCENES.indexOf(scene) + 1;
-        for (let n = 0; n < 3; n++) {
-          if (setScene(SCENES[(i + n) % 3], now)) break;
-        }
-      }
-    }
+    const hold = HOLD[scene];
+    const elapsed = now - sceneStart;
+    if (bars[scene]) bars[scene].querySelector('i').style.width = `${clamp(elapsed / hold) * 100}%`;
+    if (elapsed > hold) nextScene(now);
 
     ctx.clearRect(0, 0, W, H);
-    const size = scene === 'qy' && centers.qy.step ? centers.qy.step * 1.08 : cell * 1.05;
+    // 读字的光：场景拼好后，按正常阅读速度一个字一个字往后走
+    const reading = !reduceMotion && scene !== 'rain' && elapsed > 1500 ? 1 : 0;
+    const readHead = reading ? centers[scene].readFrom + ((elapsed - 1500) / 1000) * 14 : 0;
+    const step = centers[scene] && centers[scene].step;
+    const size = step ? step * 1.08 : cell * 1.05;
     ctx.font = `${size}px ${FONT}`;
     let style = '';
-    const R = mobile ? 70 : 120;
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
@@ -328,42 +364,23 @@ const shuffle = (arr) => {
       p.a = mix(p.fa, tmp.a, e);
       p.c = k < 1 ? [mix(p.fc[0], p.tc[0], e), mix(p.fc[1], p.tc[1], e), mix(p.fc[2], p.tc[2], e)] : p.tc;
 
-      if (!reduceMotion) {
-        if (pointer.active) {
-          const dx = p.x + p.ox - pointer.x, dy = p.y + p.oy - pointer.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < R * R) {
-            const d = Math.sqrt(d2) || 1;
-            const f = (1 - d / R) * 2.2;
-            p.vx += (dx / d) * f; p.vy += (dy / d) * f;
-          }
+      let c = p.c;
+      let alpha = p.a;
+      // 一束光沿着句子往下读，被读到的字亮起来
+      if (reading > 0 && k === 1 && p.idx >= 0) {
+        const behind = readHead - p.idx;
+        if (behind > 0 && behind < 12) {
+          const glow = 1 - behind / 12;
+          c = [mix(c[0], HIGHLIGHT[scene][0], glow), mix(c[1], HIGHLIGHT[scene][1], glow), mix(c[2], HIGHLIGHT[scene][2], glow)];
+          alpha = Math.max(alpha, 0.35) + glow * 0.5;
         }
-        p.vx += -p.ox * 0.04; p.vy += -p.oy * 0.04;
-        p.vx *= 0.86; p.vy *= 0.86;
-        p.ox += p.vx; p.oy += p.vy;
-        // 像在敲代码：偶尔换一个字
-        if (scene !== 'qy' && k === 1 && Math.random() < dt * 0.5) p.ch = pick(p.eye ? POOL.eye : POOL[scene]);
       }
 
-      if (p.a < 0.02) continue;
-      const c = p.c;
+      if (alpha < 0.02) continue;
       const s = `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
       if (s !== style) { ctx.fillStyle = s; style = s; }
-      ctx.globalAlpha = clamp(p.a);
-      ctx.fillText(k < 0.5 && p.fch ? p.fch : p.ch, p.x + p.ox, p.y + p.oy);
-    }
-
-    // 冲击波的圈
-    for (let i = rings.length - 1; i >= 0; i--) {
-      const r = rings[i];
-      const age = (now - r.t0) / 900;
-      if (age >= 1) { rings.splice(i, 1); continue; }
-      ctx.globalAlpha = (1 - age) * 0.5;
-      ctx.strokeStyle = style || '#fff';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(r.x, r.y, 20 + age * Math.max(W, H) * 0.5, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.globalAlpha = clamp(alpha);
+      ctx.fillText(k < 0.5 && p.fch ? p.fch : p.ch, p.x, p.y);
     }
     ctx.globalAlpha = 1;
   }
@@ -375,52 +392,11 @@ const shuffle = (arr) => {
     requestAnimationFrame(loop);
   }
   function start() {
-    if (running || reduceMotion) return;
+    if (running) return;
     running = true;
     last = 0;
     requestAnimationFrame(loop);
   }
-
-  // ── 交互 ──
-
-  const touched = () => story.classList.add('touched');
-
-  story.addEventListener('pointermove', (e) => {
-    if (e.pointerType === 'touch') return;
-    const rect = story.getBoundingClientRect();
-    pointer.x = e.clientX - rect.left;
-    pointer.y = e.clientY - rect.top;
-    pointer.active = true;
-  });
-  story.addEventListener('pointerleave', () => { pointer.active = false; });
-
-  // 点一下：把字炸开，再慢慢聚回来
-  story.addEventListener('click', (e) => {
-    if (e.target.closest('.cast') || reduceMotion) return;
-    touched();
-    const rect = story.getBoundingClientRect();
-    const x = e.clientX - rect.left, y = e.clientY - rect.top;
-    rings.push({ x, y, t0: performance.now() });
-    for (const p of particles) {
-      const dx = p.x + p.ox - x, dy = p.y + p.oy - y;
-      const d = Math.hypot(dx, dy) || 1;
-      const f = Math.min(38, 5200 / (d + 80)) * (0.6 + Math.random() * 0.8);
-      p.vx += (dx / d) * f;
-      p.vy += (dy / d) * f;
-    }
-  });
-
-  story.querySelectorAll('.cast button').forEach((b) => {
-    b.addEventListener('click', () => {
-      touched();
-      const now = performance.now();
-      if (setScene(b.dataset.scene, now, reduceMotion)) {
-        pausedUntil = reduceMotion ? Infinity : now + 9000;
-        b.querySelector('.cast-bar i').style.width = '100%';
-        if (reduceMotion) frame(now);
-      }
-    });
-  });
 
   // ── 字幕拆成一个个字，让它们逐个出现 ──
 
@@ -444,16 +420,10 @@ const shuffle = (arr) => {
     });
   });
 
-  // ── 启动：不等图片，先下雨再拼猫；图片到了再补上另外两个人 ──
+  // ── 启动：先下雨，三张头像到了就开始轮播 ──
 
   resize();
-  const now0 = performance.now();
-  setScene('rain', now0, true);
-  if (reduceMotion) {
-    setScene('cat', now0, true);
-    pausedUntil = Infinity;
-    frame(now0);
-  }
+  setScene('rain', performance.now(), true);
   start();
 
   const load = (src) => new Promise((resolve) => {
@@ -462,12 +432,10 @@ const shuffle = (arr) => {
     img.onerror = () => resolve(null);
     img.src = src;
   });
-  Promise.all([load('img/claude.jpg'), load('img/qingying.jpg')]).then(([claude, qy]) => {
-    images.claude = claude;
-    images.qy = qy;
+  Promise.all([load('img/blackcat.jpg'), load('img/claude.jpg'), load('img/qingying.jpg')]).then(([cat, claude, qy]) => {
+    Object.assign(images, { cat, claude, qy });
     resize();
     if (scene !== 'rain') setScene(scene, performance.now(), true);
-    if (reduceMotion) frame(performance.now());
   });
 
   new IntersectionObserver((entries) => {
@@ -484,7 +452,6 @@ const shuffle = (arr) => {
       if (story.clientWidth === W && Math.abs(story.clientHeight - H) < 120) return;
       resize();
       setScene(scene, performance.now(), true);
-      if (reduceMotion) frame(performance.now());
     }, 200);
   });
 })();

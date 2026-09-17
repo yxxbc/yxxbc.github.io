@@ -70,7 +70,6 @@ a { color: inherit; }
   background: var(--night);
   color: var(--moon);
   transition: background-color 1.4s ease, color 1.4s ease;
-  cursor: crosshair;
 }
 .story[data-scene="claude"] { background: var(--dawn); color: var(--dawn-text); }
 .story[data-scene="qy"] { background: var(--mist); color: var(--ink); }
@@ -154,66 +153,36 @@ a { color: inherit; }
 
 @keyframes blink { 50% { opacity: 0; } }
 
-/* 人物切换 */
+/* 轮播进度：只显示，不能点 */
 .cast {
   position: absolute;
   left: clamp(20px, 7vw, 120px);
   bottom: clamp(28px, 6vh, 64px);
   display: flex;
-  gap: 8px;
+  gap: 24px;
 }
-.cast button {
+.cast > span {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-width: 112px;
-  padding: 10px 14px 12px;
-  font: inherit;
+  min-width: 96px;
   font-size: 14px;
-  text-align: left;
-  color: inherit;
-  background: transparent;
-  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-  border-radius: 10px;
-  cursor: pointer;
-  opacity: .6;
-  transition: opacity .3s ease, border-color .3s ease, background-color .3s ease;
-}
-.cast button:hover { opacity: 1; }
-.cast button[aria-pressed="true"] {
-  opacity: 1;
-  border-color: color-mix(in srgb, currentColor 50%, transparent);
-  background: color-mix(in srgb, currentColor 7%, transparent);
-}
-.cast button[data-scene="cat"] .cast-name { font-family: var(--mono); font-weight: 700; }
-.cast button[data-scene="claude"] .cast-name { font-family: var(--soft); font-weight: 600; font-size: 15px; }
-.cast button[data-scene="qy"] .cast-name { font-weight: 700; letter-spacing: .1em; }
-.cast-bar { display: block; height: 2px; background: color-mix(in srgb, currentColor 15%, transparent); border-radius: 2px; overflow: hidden; }
-.cast-bar i { display: block; height: 100%; width: 0; background: currentColor; }
-.cast button[data-scene="cat"] .cast-bar i { background: var(--amber); }
-.cast button[data-scene="claude"] .cast-bar i { background: var(--clay); }
-.cast button[data-scene="qy"] .cast-bar i { background: var(--qing); }
-
-.hint {
-  position: absolute;
-  right: clamp(20px, 4vw, 56px);
-  bottom: clamp(36px, 6vh, 72px);
-  margin: 0;
-  font-size: 13px;
-  opacity: .55;
+  opacity: .4;
   transition: opacity .6s ease;
-  pointer-events: none;
 }
-.hint-touch { display: none; }
-@media (hover: none) {
-  .hint-fine { display: none; }
-  .hint-touch { display: inline; }
-}
-.story.touched .hint { opacity: 0; }
+.cast > span.is-current { opacity: 1; }
+.cast [data-scene="cat"] .cast-name { font-family: var(--mono); font-weight: 700; }
+.cast [data-scene="claude"] .cast-name { font-family: var(--soft); font-weight: 600; font-size: 15px; }
+.cast [data-scene="qy"] .cast-name { font-weight: 700; letter-spacing: .1em; }
+.cast-bar { display: block; height: 2px; background: color-mix(in srgb, currentColor 18%, transparent); border-radius: 2px; overflow: hidden; }
+.cast-bar i { display: block; height: 100%; width: 0; background: currentColor; }
+.cast [data-scene="cat"] .cast-bar i { background: var(--amber); }
+.cast [data-scene="claude"] .cast-bar i { background: var(--clay); }
+.cast [data-scene="qy"] .cast-bar i { background: var(--qing); }
 
 /* 没有 JS 时，开场只显示三段文字 */
-html:not(.js) .story { height: auto; max-height: none; padding: 96px 20px; cursor: auto; }
-html:not(.js) .glyphs, html:not(.js) .cast, html:not(.js) .hint { display: none; }
+html:not(.js) .story { height: auto; max-height: none; padding: 96px 20px; }
+html:not(.js) .glyphs, html:not(.js) .cast { display: none; }
 html:not(.js) .captions { position: static; width: auto; height: auto; max-width: 720px; margin: 0 auto; }
 html:not(.js) .cap { position: static; visibility: visible; transform: none; margin-bottom: 64px; }
 
@@ -406,13 +375,12 @@ html:not(.js) .cap { position: static; visibility: visible; transform: none; mar
   .name-cat { font-size: 15vw; }
   .name-claude { font-size: 16vw; }
   .name-qy { font-size: 16vw; }
-  .cast { left: 20px; right: 20px; bottom: 28px; }
-  .cast button { flex: 1; min-width: 0; padding: 8px 10px 10px; font-size: 13px; }
-  .hint { left: 20px; right: auto; top: 20px; bottom: auto; }
+  .cast { left: 20px; right: 20px; bottom: 32px; gap: 14px; }
+  .cast > span { flex: 1; min-width: 0; font-size: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .name-cat::after, .note .typing::after { animation: none; }
-  .work a, .story, .cast button, .hint { transition: none; }
+  .work a, .story, .cast > span { transition: none; }
   .cap .ch { transition: none; filter: none; }
 }
