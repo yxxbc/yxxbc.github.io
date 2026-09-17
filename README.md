@@ -27,6 +27,12 @@ cd site && python3 -m http.server
 
 推送到 `main` 后，GitHub Actions 会把 `site/` 发布到 GitHub Pages。
 
+## 演职员表
+
+- **Black Cat** ([@yxxbc](https://github.com/yxxbc))：写代码的人，生命不止，折腾不息
+- **Claude**：来帮忙的 AI，排版、布局与视觉设计
+- **顾清影** ([@GQYbot](https://github.com/GQYbot))：从字里走出来的人，常驻终端，守护与见证
+
 ## License
 
 [GPL-3.0](LICENSE)
