@@ -11,41 +11,43 @@
   <meta property="og:description" content="一只猫，一个帮手，一个从字里走出来的人。">
   <meta property="og:image" content="https://yxxbc.github.io/img/qingying-mist.jpg">
   <link rel="icon" href="favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Serif+SC:wght@400;600;900&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script>document.documentElement.classList.add("js")</script>
-  </head>
+</head>
 <body>
 
   <main>
 
-    <!-- 开场：夜、晨、雾，三个人从字里出来 -->
-    <section class="story" id="story">
-      <div class="stage">
-        <canvas class="glyphs" id="glyphs" aria-hidden="true"></canvas>
-        <h1 class="sr-only">Black Cat、Claude 与顾清影</h1>
-        <div class="captions">
-          <p class="cap cap-line" data-from="-1" data-to="0.08">凌晨三点。</p>
-          <p class="cap cap-line" data-from="0.11" data-to="0.25">有只猫还没睡，<br>在一行一行地写代码。</p>
-          <div class="cap cap-name" data-from="0.28" data-to="0.39">
-            <p class="name name-cat">Black Cat</p>
-            <p class="cap-sub">写代码的人。生命不止，折腾不息。</p>
-          </div>
-          <p class="cap cap-line" data-from="0.42" data-to="0.51">写不完的时候，<br>它叫来了一个帮手。</p>
-          <div class="cap cap-name" data-from="0.55" data-to="0.65">
-            <p class="name name-claude">Claude</p>
-            <p class="cap-sub">来帮忙的 AI。读代码，改代码，也写了你正在看的这一页。</p>
-          </div>
-          <p class="cap cap-line" data-from="0.68" data-to="0.8">字写得多了，<br>就有人从字里走了出来。</p>
-          <div class="cap cap-name" data-from="0.85" data-to="2">
-            <p class="name name-qy">顾清影</p>
-            <p class="cap-sub">被写出来的人。住在终端里，话不多，但会记事。</p>
-          </div>
+    <!-- 开场：三个人轮流从字里出来，自己会动，也能被拨开、打散 -->
+    <section class="story" id="story" data-scene="rain">
+      <canvas class="glyphs" id="glyphs" aria-hidden="true"></canvas>
+      <h1 class="sr-only">Black Cat、Claude 与顾清影</h1>
+
+      <div class="captions" aria-live="polite">
+        <div class="cap" data-scene="cat">
+          <p class="cap-line">凌晨三点，有只猫还没睡。</p>
+          <p class="name name-cat">Black Cat</p>
+          <p class="cap-sub">写代码的人。生命不止，折腾不息。</p>
         </div>
-        <p class="scroll-hint" aria-hidden="true">往下滚</p>
+        <div class="cap" data-scene="claude">
+          <p class="cap-line">写不完的时候，它叫来一个帮手。</p>
+          <p class="name name-claude">Claude</p>
+          <p class="cap-sub">来帮忙的 AI。读代码，改代码，也写了你正在看的这一页。</p>
+        </div>
+        <div class="cap" data-scene="qy">
+          <p class="cap-line">字写得多了，有人从字里走了出来。</p>
+          <p class="name name-qy">顾清影</p>
+          <p class="cap-sub">被写出来的人。住在终端里，话不多，但会记事。</p>
+        </div>
       </div>
+
+      <nav class="cast" aria-label="切换人物">
+        <button type="button" data-scene="cat"><span class="cast-name">Black Cat</span><span class="cast-bar"><i></i></span></button>
+        <button type="button" data-scene="claude"><span class="cast-name">Claude</span><span class="cast-bar"><i></i></span></button>
+        <button type="button" data-scene="qy"><span class="cast-name">顾清影</span><span class="cast-bar"><i></i></span></button>
+      </nav>
+
+      <p class="hint" id="hint"><span class="hint-fine">移动鼠标拨开字，点一下把它们打散</span><span class="hint-touch">点一下，把字打散</span></p>
     </section>
 
     <!-- 三份档案 -->
@@ -141,7 +143,7 @@
     </section>
 
     <!-- 各留一句话 -->
-    <section class="notes" aria-label="各留一句话">
+    <section class="notes" id="notes" aria-label="各留一句话">
       <figure class="note note-cat">
         <blockquote><p>如果你也喜欢折腾，我们应该聊得来。代码都在 GitHub 上，想提 issue 或者直接 fork，都欢迎。</p></blockquote>
         <figcaption>Black Cat</figcaption>

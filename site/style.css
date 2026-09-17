@@ -25,9 +25,10 @@
   --qing: #4f7f77;
   --rouge: #b85a4f;
 
-  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --serif: "Noto Serif SC", "Songti SC", "STSong", serif;
-  --soft: "Fraunces", "Noto Serif SC", Georgia, serif;
+  /* 只用系统自带字体，打开就能显示，不等网络 */
+  --mono: "JetBrains Mono", "SF Mono", "Cascadia Code", Menlo, Consolas, "PingFang SC", monospace;
+  --serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+  --soft: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Songti SC", serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -57,22 +58,22 @@ a { color: inherit; }
   white-space: nowrap;
 }
 
-/* ───────── 开场：字里走出来的三个人 ───────── */
+/* ───────── 开场：三个人轮流从字里出来 ───────── */
 
 .story {
   position: relative;
-  height: 820vh;
-  background: var(--night);
-}
-
-.stage {
-  position: sticky;
-  top: 0;
   height: 100vh;
   height: 100svh;
+  min-height: 600px;
+  max-height: 1200px;
   overflow: hidden;
-  background: var(--stage-bg, var(--night));
+  background: var(--night);
+  color: var(--moon);
+  transition: background-color 1.4s ease, color 1.4s ease;
+  cursor: crosshair;
 }
+.story[data-scene="claude"] { background: var(--dawn); color: var(--dawn-text); }
+.story[data-scene="qy"] { background: var(--mist); color: var(--ink); }
 
 .glyphs {
   position: absolute;
@@ -86,7 +87,8 @@ a { color: inherit; }
   position: absolute;
   left: clamp(20px, 7vw, 120px);
   top: 50%;
-  width: min(40vw, 560px);
+  width: min(42vw, 600px);
+  height: 0;
   pointer-events: none;
 }
 
@@ -95,21 +97,32 @@ a { color: inherit; }
   left: 0;
   top: 0;
   width: 100%;
-  margin: 0;
-  opacity: 0;
   transform: translateY(-50%);
-  color: var(--cap-color, var(--moon));
-  will-change: opacity, transform;
+  visibility: hidden;
 }
+.cap.is-active { visibility: visible; }
 
 .cap-line {
-  font-size: clamp(26px, 3.2vw, 46px);
-  font-weight: 600;
-  line-height: 1.45;
+  margin: 0 0 18px;
+  font-size: clamp(16px, 1.5vw, 20px);
+  opacity: .7;
 }
+.cap .name { margin: 0 0 16px; line-height: 1; white-space: nowrap; }
+.cap-sub { margin: 0; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.8; opacity: .72; max-width: 26em; }
 
-.cap-name .name { margin: 0 0 14px; line-height: 1; white-space: nowrap; }
-.cap-sub { margin: 0; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.8; opacity: .75; max-width: 26em; }
+/* 字幕逐字出现、离开时往上散 */
+.cap .ch {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(.4em);
+  filter: blur(6px);
+  transition: opacity .5s ease, transform .6s cubic-bezier(.2, .8, .2, 1), filter .5s ease;
+  transition-delay: calc(var(--i) * 28ms);
+  white-space: pre;
+}
+.cap.is-active .ch { opacity: 1; transform: none; filter: none; }
+.cap.is-leaving { visibility: visible; }
+.cap.is-leaving .ch { opacity: 0; transform: translateY(-.5em); filter: blur(6px); transition-delay: calc(var(--i) * 8ms); }
 
 .name-cat {
   font-family: var(--mono);
@@ -131,8 +144,7 @@ a { color: inherit; }
   font-family: var(--soft);
   font-weight: 600;
   font-size: clamp(56px, 7.6vw, 124px);
-  letter-spacing: -.03em;
-  font-variation-settings: "opsz" 144;
+  letter-spacing: -.02em;
 }
 .name-qy {
   font-weight: 900;
@@ -142,40 +154,81 @@ a { color: inherit; }
 
 @keyframes blink { 50% { opacity: 0; } }
 
-.scroll-hint {
+/* 人物切换 */
+.cast {
   position: absolute;
-  left: 50%;
-  bottom: 28px;
-  margin: 0;
-  transform: translateX(-50%);
-  font: 13px var(--mono);
-  color: var(--moon-dim);
-  letter-spacing: .2em;
-  transition: opacity .4s ease;
+  left: clamp(20px, 7vw, 120px);
+  bottom: clamp(28px, 6vh, 64px);
+  display: flex;
+  gap: 8px;
 }
-.scroll-hint::after {
-  content: "";
-  display: block;
-  width: 1px;
-  height: 36px;
-  margin: 10px auto 0;
-  background: linear-gradient(var(--moon-dim), transparent);
-  animation: drip 1.8s ease-in-out infinite;
-  transform-origin: top;
+.cast button {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 112px;
+  padding: 10px 14px 12px;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  color: inherit;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 10px;
+  cursor: pointer;
+  opacity: .6;
+  transition: opacity .3s ease, border-color .3s ease, background-color .3s ease;
 }
-@keyframes drip {
-  0% { transform: scaleY(0); }
-  60% { transform: scaleY(1); opacity: 1; }
-  100% { transform: scaleY(1); opacity: 0; }
+.cast button:hover { opacity: 1; }
+.cast button[aria-pressed="true"] {
+  opacity: 1;
+  border-color: color-mix(in srgb, currentColor 50%, transparent);
+  background: color-mix(in srgb, currentColor 7%, transparent);
 }
-.story.started .scroll-hint { opacity: 0; }
+.cast button[data-scene="cat"] .cast-name { font-family: var(--mono); font-weight: 700; }
+.cast button[data-scene="claude"] .cast-name { font-family: var(--soft); font-weight: 600; font-size: 15px; }
+.cast button[data-scene="qy"] .cast-name { font-weight: 700; letter-spacing: .1em; }
+.cast-bar { display: block; height: 2px; background: color-mix(in srgb, currentColor 15%, transparent); border-radius: 2px; overflow: hidden; }
+.cast-bar i { display: block; height: 100%; width: 0; background: currentColor; }
+.cast button[data-scene="cat"] .cast-bar i { background: var(--amber); }
+.cast button[data-scene="claude"] .cast-bar i { background: var(--clay); }
+.cast button[data-scene="qy"] .cast-bar i { background: var(--qing); }
 
-/* 没有 JS 时，开场退化成三段普通文字 */
-html:not(.js) .story { height: auto; }
-html:not(.js) .stage { position: relative; height: auto; padding: 96px 20px; }
-html:not(.js) .glyphs, html:not(.js) .scroll-hint { display: none; }
-html:not(.js) .captions { position: static; width: auto; max-width: 720px; margin: 0 auto; }
-html:not(.js) .cap { position: static; opacity: 1; transform: none; margin-bottom: 56px; }
+.hint {
+  position: absolute;
+  right: clamp(20px, 4vw, 56px);
+  bottom: clamp(36px, 6vh, 72px);
+  margin: 0;
+  font-size: 13px;
+  opacity: .55;
+  transition: opacity .6s ease;
+  pointer-events: none;
+}
+.hint-touch { display: none; }
+@media (hover: none) {
+  .hint-fine { display: none; }
+  .hint-touch { display: inline; }
+}
+.story.touched .hint { opacity: 0; }
+
+/* 没有 JS 时，开场只显示三段文字 */
+html:not(.js) .story { height: auto; max-height: none; padding: 96px 20px; cursor: auto; }
+html:not(.js) .glyphs, html:not(.js) .cast, html:not(.js) .hint { display: none; }
+html:not(.js) .captions { position: static; width: auto; height: auto; max-width: 720px; margin: 0 auto; }
+html:not(.js) .cap { position: static; visibility: visible; transform: none; margin-bottom: 64px; }
+
+/* 留言逐字打出来 */
+.note .typing::after {
+  content: "";
+  display: inline-block;
+  width: .5em;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -.15em;
+  background: currentColor;
+  opacity: .7;
+  animation: blink 1s steps(1) infinite;
+}
 
 /* ───────── 三份档案 ───────── */
 
@@ -347,16 +400,19 @@ html:not(.js) .cap { position: static; opacity: 1; transform: none; margin-botto
 
 @media (max-width: 700px) {
   body { font-size: 16px; }
-  .story { height: 700vh; }
-  .captions { left: 20px; right: 20px; top: auto; bottom: 20vh; width: auto; }
+  .story { min-height: 640px; }
+  .captions { left: 20px; right: 20px; top: auto; bottom: 150px; width: auto; }
   .cap { top: auto; bottom: 0; transform: none; }
-  .cap-line { font-size: 24px; }
   .name-cat { font-size: 15vw; }
   .name-claude { font-size: 16vw; }
   .name-qy { font-size: 16vw; }
+  .cast { left: 20px; right: 20px; bottom: 28px; }
+  .cast button { flex: 1; min-width: 0; padding: 8px 10px 10px; font-size: 13px; }
+  .hint { left: 20px; right: auto; top: 20px; bottom: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .name-cat::after, .scroll-hint::after { animation: none; }
-  .work a, .scroll-hint { transition: none; }
+  .name-cat::after, .note .typing::after { animation: none; }
+  .work a, .story, .cast button, .hint { transition: none; }
+  .cap .ch { transition: none; filter: none; }
 }
