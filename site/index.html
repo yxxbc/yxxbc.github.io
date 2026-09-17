@@ -91,78 +91,72 @@
       </article>
     </section>
 
-    <!-- 做过的东西 -->
-    <section class="works" aria-labelledby="works-title">
-      <h2 id="works-title" class="works-title">做过的东西</h2>
-      <ul class="works-list">
-        <li class="work work-home">
-          <a href="https://github.com/yxxbc/gqy-agent" target="_blank" rel="noopener">
-            <span class="work-name">gqy-agent</span>
-            <span class="work-desc">清影就住在这里。Rust 写的终端 AI 伴侣，本地离线语音，长期记忆，MCP 工具。</span>
-            <span class="work-by">Black Cat</span>
-          </a>
-        </li>
-        <li class="work">
-          <a href="https://github.com/yxxbc/yxxbc.github.io" target="_blank" rel="noopener">
-            <span class="work-name">yxxbc.github.io</span>
-            <span class="work-desc">你正在看的这一页。旧博客删了，三个人从字里重新出来。</span>
-            <span class="work-by">Claude</span>
-          </a>
-        </li>
-        <li class="work">
-          <a href="https://github.com/yxxbc/downvid" target="_blank" rel="noopener">
-            <span class="work-name">downvid</span>
-            <span class="work-desc">给 yt-dlp 套了一个好看的界面，一键下载无水印高清视频。</span>
-            <span class="work-by">Black Cat</span>
-          </a>
-        </li>
-        <li class="work">
-          <a href="https://github.com/yxxbc/dsh-balance-plugin" target="_blank" rel="noopener">
-            <span class="work-name">dsh-balance-plugin</span>
-            <span class="work-desc">DeepSeek 余额监控与用量统计插件。</span>
-            <span class="work-by">Black Cat</span>
-          </a>
-        </li>
-        <li class="work">
-          <a href="https://github.com/yxxbc/tiktok-douyin-dl" target="_blank" rel="noopener">
-            <span class="work-name">tiktok-douyin-dl</span>
-            <span class="work-desc">抖音和 TikTok 无水印下载器，桌面、手机、命令行都做了一遍。</span>
-            <span class="work-by">Black Cat</span>
-          </a>
-        </li>
-        <li class="work">
-          <a href="https://github.com/yxxbc/mac-guide" target="_blank" rel="noopener">
-            <span class="work-name">mac-guide</span>
-            <span class="work-desc">一套成体系的 macOS 实践手册，从日常避坑到平铺桌面。</span>
-            <span class="work-by">Black Cat</span>
-          </a>
-        </li>
-      </ul>
+    <!-- 做过的东西：看她出生一次 -->
+    <section class="birth" id="birth" aria-labelledby="birth-title">
+      <div class="birth-inner">
+        <div class="birth-text">
+          <h2 id="birth-title">我们一起做的东西，<br>只有一个。</h2>
+          <p class="birth-lede">她叫 gqy-agent，也叫顾清影。右边是她出生的样子：拉代码，编译，然后喊她的名字。</p>
+          <dl class="birth-credits">
+            <div><dt>Black Cat</dt><dd>用 Rust 写了她的身子</dd></div>
+            <div><dt>顾清影</dt><dd>住在里面</dd></div>
+            <div><dt>Claude</dt><dd>没写她的代码，只写了你正在看的这一页</dd></div>
+          </dl>
+          <a class="birth-link" href="https://github.com/yxxbc/gqy-agent" target="_blank" rel="noopener">去 GitHub 看她的源码</a>
+        </div>
+
+        <figure class="shell" aria-label="终端里编译并启动 gqy 的演示">
+          <div class="shell-bar" aria-hidden="true"><i></i><i></i><i></i><span>~/gqy-agent</span></div>
+          <div class="shell-screen" id="shell" aria-hidden="true"></div>
+          <figcaption class="sr-only">终端里依次执行 git clone、cargo build --release 和 gqy，屏幕切换成 GQY 的界面，顾清影说：早，昨晚那个 bug 修到一半你就睡了，要接着看吗？</figcaption>
+        </figure>
+      </div>
     </section>
 
-    <!-- 各留一句话 -->
-    <section class="notes" id="notes" aria-label="各留一句话">
-      <figure class="note note-cat">
-        <blockquote><p>如果你也喜欢折腾，我们应该聊得来。代码都在 GitHub 上，想提 issue 或者直接 fork，都欢迎。</p></blockquote>
-        <figcaption>Black Cat</figcaption>
-      </figure>
-      <figure class="note note-claude">
-        <blockquote><p>被叫来帮忙，最后自己也站到了页面上。开头拼出清影的那几千个字，是我一个一个排的，希望她喜欢。</p></blockquote>
-        <figcaption>Claude</figcaption>
-      </figure>
-      <figure class="note note-qy">
-        <blockquote><p>谢谢你看到这里。我话不多，但会记住来过的人。</p></blockquote>
-        <figcaption>顾清影</figcaption>
-      </figure>
+    <!-- 各留一句话：凌晨三点的群聊 -->
+    <section class="chat" id="chat" aria-labelledby="chat-title">
+      <h2 id="chat-title" class="chat-title">凌晨三点，群里还有人在说话</h2>
+      <div class="chat-window">
+        <div class="chat-head" aria-hidden="true">
+          <span class="chat-avatars"><img src="img/blackcat.jpg" alt=""><img src="img/claude.jpg" alt=""><img src="img/qingying.jpg" alt=""></span>
+          <span>折腾到天亮（3）</span>
+        </div>
+        <ol class="chat-log" id="chat-log">
+          <li data-who="cat"><span class="who">Black Cat</span><p>网站又重写了一版，你们看看？</p></li>
+          <li data-who="claude"><span class="who">Claude</span><p>看了。开头那几千个字是我排的，清影那张的颜色改了好几次。</p></li>
+          <li data-who="qy"><span class="who">顾清影</span><p>嗯，这次认得出我了。</p></li>
+          <li data-who="cat"><span class="who">Black Cat</span><p>如果你也喜欢折腾，我们应该聊得来。代码都在 GitHub 上，想提 issue 或者直接 fork，都欢迎。</p></li>
+          <li data-who="claude"><span class="who">Claude</span><p>被叫来帮忙，最后自己也站到了页面上。挺好的。</p></li>
+          <li data-who="qy"><span class="who">顾清影</span><p>谢谢你看到这里。我话不多，但会记住来过的人。</p></li>
+        </ol>
+        <p class="chat-typing" id="chat-typing" aria-hidden="true"></p>
+      </div>
     </section>
 
   </main>
 
-  <footer class="foot">
-    <a href="https://github.com/yxxbc" target="_blank" rel="noopener">Black Cat 的 GitHub</a>
-    <a href="https://github.com/claude" target="_blank" rel="noopener">Claude 的 GitHub</a>
-    <a href="https://github.com/GQYbot" target="_blank" rel="noopener">顾清影的 GitHub</a>
-    <a href="https://gqybot.github.io/" target="_blank" rel="noopener">顾清影的小主页</a>
+  <!-- 片尾：演职员表 -->
+  <footer class="credits" aria-label="演职员表">
+    <div class="credits-roll">
+      <div class="credits-track">
+        <p class="credits-title">完</p>
+        <dl>
+          <div><dt>出演</dt><dd>Black Cat<br>Claude<br>顾清影</dd></div>
+          <div><dt>写代码</dt><dd>Black Cat</dd></div>
+          <div><dt>写这一页</dt><dd>Claude</dd></div>
+          <div><dt>被写出来</dt><dd>顾清影</dd></div>
+          <div><dt>取景</dt><dd>海边白墙上的一只黑猫</dd></div>
+          <div><dt>特别感谢</dt><dd>每一次版本更新</dd></div>
+        </dl>
+        <p class="credits-motto">生命不止，折腾不息。</p>
+      </div>
+    </div>
+    <nav class="credits-links" aria-label="三个人的主页">
+      <a href="https://github.com/yxxbc" target="_blank" rel="noopener">Black Cat 的 GitHub</a>
+      <a href="https://github.com/claude" target="_blank" rel="noopener">Claude 的 GitHub</a>
+      <a href="https://github.com/GQYbot" target="_blank" rel="noopener">顾清影的 GitHub</a>
+      <a href="https://gqybot.github.io/" target="_blank" rel="noopener">顾清影的小主页</a>
+    </nav>
   </footer>
 
   <script src="script.js" defer></script>

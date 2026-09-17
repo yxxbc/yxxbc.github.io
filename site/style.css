@@ -186,19 +186,6 @@ html:not(.js) .glyphs, html:not(.js) .cast { display: none; }
 html:not(.js) .captions { position: static; width: auto; height: auto; max-width: 720px; margin: 0 auto; }
 html:not(.js) .cap { position: static; visibility: visible; transform: none; margin-bottom: 64px; }
 
-/* 留言逐字打出来 */
-.note .typing::after {
-  content: "";
-  display: inline-block;
-  width: .5em;
-  height: 1.05em;
-  margin-left: 2px;
-  vertical-align: -.15em;
-  background: currentColor;
-  opacity: .7;
-  animation: blink 1s steps(1) infinite;
-}
-
 /* ───────── 三份档案 ───────── */
 
 .files {
@@ -264,107 +251,251 @@ html:not(.js) .cap { position: static; visibility: visible; transform: none; mar
   opacity: .9;
 }
 
-/* ───────── 做过的东西 ───────── */
+/* ───────── 做过的东西：看她出生一次 ───────── */
 
-.works {
-  padding: clamp(80px, 12vw, 160px) clamp(20px, 6vw, 96px);
-  background: var(--mist);
-  border-top: 1px solid var(--mist-2);
+.birth {
+  padding: clamp(88px, 12vw, 160px) clamp(20px, 6vw, 96px);
+  background: var(--night);
+  color: var(--moon);
 }
-.works-title {
-  max-width: 1120px;
-  margin: 0 auto 48px;
-  font-size: clamp(28px, 3.6vw, 44px);
+.birth-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.birth h2 {
+  margin: 0 0 20px;
+  font-size: clamp(30px, 3.6vw, 48px);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.birth-lede { margin: 0 0 36px; color: var(--moon-dim); }
+.birth-credits { margin: 0 0 36px; }
+.birth-credits div {
+  display: grid;
+  grid-template-columns: 6.5em 1fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--night-line);
+}
+.birth-credits dt { font-size: 15px; }
+.birth-credits div:nth-child(1) dt { color: var(--amber); font-family: var(--mono); font-weight: 700; }
+.birth-credits div:nth-child(2) dt { color: #e6a3c0; font-weight: 700; }
+.birth-credits div:nth-child(3) dt { color: var(--clay); font-family: var(--soft); font-weight: 600; }
+.birth-credits dd { margin: 0; color: var(--moon-dim); }
+.birth-link {
+  display: inline-block;
+  padding: 11px 22px;
+  color: var(--night);
+  background: var(--moon);
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 15px;
+}
+.birth-link:hover { background: #fff; }
+
+.shell {
+  margin: 0;
+  background: #1f1f2d;
+  border: 1px solid #34344a;
+  border-radius: 14px;
+  box-shadow: 0 40px 100px -40px #000;
+  overflow: hidden;
+}
+.shell-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #2c2c40;
+  font: 12px var(--mono);
+  color: #8e8aa8;
+}
+.shell-bar i { width: 11px; height: 11px; border-radius: 50%; background: #3a3a52; }
+.shell-bar i:nth-child(1) { background: #ec6a5e; }
+.shell-bar i:nth-child(2) { background: #f4bf4f; }
+.shell-bar i:nth-child(3) { background: #61c554; }
+.shell-bar span { margin-left: 8px; }
+.shell-screen {
+  height: clamp(360px, 38vw, 460px);
+  padding: 18px 20px;
+  overflow: hidden;
+  font: 13.5px/1.7 var(--mono);
+  color: #cfcbe6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.shell-screen .dim { color: #7d7998; }
+.shell-screen .ok { color: #9fd3a8; }
+.shell-screen .prompt { color: #e6a3c0; }
+.shell-screen .cursor {
+  display: inline-block;
+  width: .6em;
+  height: 1.1em;
+  vertical-align: -.2em;
+  background: #e6a3c0;
+  animation: blink 1s steps(1) infinite;
+}
+/* gqy 的界面 */
+.tui { display: grid; place-items: center; height: 100%; text-align: center; white-space: pre; }
+.tui-logo {
+  margin: 0;
+  font-size: clamp(7px, .9vw, 11px);
+  line-height: 1.05;
+  background: linear-gradient(90deg, #b9c3ea, #d9b4d8 55%, #e79fb8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.tui-agent { margin: 6px 0 22px; letter-spacing: .6em; color: #9d99b8; font-size: 12px; }
+.tui-mode { margin: 0 0 18px; color: #9d99b8; font-family: var(--serif); letter-spacing: .12em; font-size: 14px; }
+.tui-mode b { color: #dcd8f2; font-weight: 600; }
+.tui-say {
+  max-width: 30em;
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid #8fa7e6;
+  text-align: left;
+  white-space: normal;
+  font-family: var(--serif);
+  font-size: 15px;
+  color: #e3e0f5;
+}
+.tui-say::before { content: "清影 › "; color: #e6a3c0; font-family: var(--mono); font-size: 13px; }
+
+/* ───────── 凌晨三点的群聊 ───────── */
+
+.chat {
+  padding: clamp(88px, 12vw, 160px) clamp(20px, 6vw, 96px);
+  background: var(--dawn);
+  color: var(--dawn-text);
+}
+.chat-title {
+  max-width: 720px;
+  margin: 0 auto 36px;
+  font-size: clamp(26px, 3vw, 40px);
   font-weight: 600;
 }
-.works-list {
-  max-width: 1120px;
+.chat-window {
+  max-width: 720px;
   margin: 0 auto;
-  padding: 0;
+  background: #231815;
+  border: 1px solid var(--dawn-line);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--dawn-line);
+  font-size: 15px;
+  color: var(--dawn-dim);
+}
+.chat-avatars { display: flex; }
+.chat-avatars img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 2px solid #231815; margin-left: -8px; }
+.chat-avatars img:first-child { margin-left: 0; }
+.chat-avatars img:last-child { object-position: 50% 15%; }
+
+.chat-log {
   list-style: none;
-  border-top: 2px solid var(--ink);
-}
-.work a {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr) 7em;
-  gap: 24px;
-  align-items: baseline;
-  padding: 24px 0;
-  text-decoration: none;
-  border-bottom: 1px solid var(--mist-2);
-  transition: padding .25s ease, background-color .25s ease;
-}
-.work-name {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: clamp(20px, 2.4vw, 32px);
-  letter-spacing: -.03em;
-  overflow-wrap: anywhere;
-}
-.work-desc { color: var(--ink-dim); font-size: 16px; line-height: 1.8; }
-.work-by { justify-self: end; font-size: 14px; color: var(--ink-dim); }
-.work a:hover { padding-left: 18px; padding-right: 18px; background: var(--mist-2); }
-.work a:hover .work-name { color: var(--qing); }
-
-.work-home a { color: var(--moon); background: var(--night); padding-left: 18px; padding-right: 18px; border-bottom-color: var(--night); }
-.work-home .work-name { color: var(--amber); }
-.work-home .work-desc, .work-home .work-by { color: var(--moon-dim); }
-.work-home a:hover { background: var(--night-2); }
-.work-home a:hover .work-name { color: var(--amber); }
-
-/* ───────── 留言 ───────── */
-
-.notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.note {
   margin: 0;
-  padding: clamp(64px, 9vw, 128px) clamp(20px, 3.4vw, 56px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 22px 18px 8px;
+  min-height: 520px;
 }
-.note blockquote { margin: 0; }
-.note p { margin: 0; font-size: clamp(19px, 1.8vw, 24px); line-height: 1.75; }
-.note figcaption { margin-top: 24px; font-size: 15px; }
-
-.note-cat { background: var(--night); color: var(--moon); }
-.note-cat p { font-family: var(--mono); font-size: clamp(16px, 1.4vw, 19px); line-height: 1.85; }
-.note-cat figcaption { color: var(--amber); font-family: var(--mono); }
-.note-cat figcaption::before { content: "// "; }
-
-.note-claude { background: var(--dawn-2); color: var(--dawn-text); }
-.note-claude figcaption { color: var(--clay); font-family: var(--soft); font-size: 20px; }
-
-.note-qy { background: var(--mist-2); color: var(--ink); }
-.note-qy figcaption { color: var(--qing); letter-spacing: .3em; }
-.note-qy figcaption::before { content: "—— "; letter-spacing: 0; }
-
-/* ───────── 页脚 ───────── */
-
-.foot {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px 36px;
-  padding: 36px 20px 44px;
-  background: var(--night);
-  font-size: 14px;
+.chat-log li {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 4px 12px;
+  margin-bottom: 18px;
 }
-.foot a { color: var(--moon-dim); text-decoration: none; }
-.foot a:hover { color: var(--amber); }
+.chat-log li::before {
+  content: "";
+  grid-row: span 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: center / cover no-repeat;
+}
+.chat-log li[data-who="cat"]::before { background-image: url("img/blackcat.jpg"); }
+.chat-log li[data-who="claude"]::before { background-image: url("img/claude.jpg"); }
+.chat-log li[data-who="qy"]::before { background-image: url("img/qingying.jpg"); background-position: 50% 15%; background-size: 160%; }
+.chat-log .who { font-size: 13px; color: var(--dawn-dim); }
+.chat-log p {
+  justify-self: start;
+  max-width: 34em;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 4px 14px 14px 14px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.chat-log li[data-who="cat"] p { background: var(--night-2); color: var(--moon); font-family: var(--mono); font-size: 14.5px; }
+.chat-log li[data-who="claude"] p { background: #4a2f27; color: var(--dawn-text); }
+.chat-log li[data-who="qy"] p { background: var(--mist); color: var(--ink); }
+
+.js .chat-log li { display: none; }
+.js .chat-log li.shown { display: grid; animation: pop .35s cubic-bezier(.2, .9, .3, 1.2); }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+
+.chat-typing { min-height: 44px; margin: 0; padding: 0 18px 18px; font-size: 13px; color: var(--dawn-dim); }
+.chat-typing:not(:empty)::after {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+  background: radial-gradient(circle, currentColor 2px, transparent 2.5px) 0 50% / 6px 6px repeat-x;
+  animation: dots 1s steps(3) infinite;
+}
+@keyframes dots { from { width: 6px; } to { width: 24px; } }
+
+/* ───────── 片尾：演职员表 ───────── */
+
+.credits {
+  position: relative;
+  padding: 0 20px 44px;
+  background: #07090f;
+  color: var(--moon);
+  text-align: center;
+}
+.credits-roll {
+  position: relative;
+  height: 70vh;
+  min-height: 420px;
+  max-height: 640px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+}
+.credits-track { padding: 70vh 0; animation: roll 26s linear infinite; }
+.credits.paused .credits-track { animation-play-state: paused; }
+@keyframes roll { to { transform: translateY(-100%); } }
+
+.credits-title { margin: 0 0 72px; font-size: 44px; font-weight: 900; letter-spacing: .4em; }
+.credits dl { margin: 0; }
+.credits dl div { margin: 0 0 44px; }
+.credits dt { font-size: 13px; letter-spacing: .3em; color: var(--moon-dim); margin-bottom: 8px; }
+.credits dd { margin: 0; font-size: 22px; line-height: 1.7; }
+.credits-motto { margin: 72px 0 0; font-size: 18px; color: var(--amber); }
+
+.credits-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 32px; font-size: 14px; }
+.credits-links a { color: var(--moon-dim); text-decoration: none; }
+.credits-links a:hover { color: var(--amber); }
 
 /* ───────── 窄屏 ───────── */
 
 @media (max-width: 1000px) {
-  .files, .notes { grid-template-columns: 1fr; }
+  .files { grid-template-columns: 1fr; }
+  .birth-inner { grid-template-columns: 1fr; }
   .file { padding-left: clamp(20px, 7vw, 64px); padding-right: clamp(20px, 7vw, 64px); }
   .file dl, .file-lede { max-width: 34em; }
   .seal { right: clamp(20px, 7vw, 64px); }
-}
-
-@media (max-width: 820px) {
-  .work a { grid-template-columns: 1fr auto; gap: 4px 16px; }
-  .work-desc { grid-column: 1 / -1; grid-row: 2; }
-  .work-by { grid-row: 1; grid-column: 2; }
 }
 
 @media (max-width: 700px) {
@@ -377,10 +508,18 @@ html:not(.js) .cap { position: static; visibility: visible; transform: none; mar
   .name-qy { font-size: 16vw; }
   .cast { left: 20px; right: 20px; bottom: 32px; gap: 14px; }
   .cast > span { flex: 1; min-width: 0; font-size: 13px; }
+  .shell-screen { height: 400px; padding: 14px; font-size: 12px; }
+  .tui-say { font-size: 14px; }
+  .chat-log { min-height: 640px; padding: 18px 12px 4px; }
+  .chat-log p { font-size: 15px; }
+  .credits dd { font-size: 19px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .name-cat::after, .note .typing::after { animation: none; }
-  .work a, .story, .cast > span { transition: none; }
+  .name-cat::after, .shell-screen .cursor, .chat-typing::after { animation: none; }
+  .credits-track { animation: none; padding: 48px 0; }
+  .credits-roll { height: auto; max-height: none; -webkit-mask-image: none; mask-image: none; }
+  .js .chat-log li { display: grid; animation: none; }
+  .story, .cast > span { transition: none; }
   .cap .ch { transition: none; filter: none; }
 }

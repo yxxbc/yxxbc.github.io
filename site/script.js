@@ -48,7 +48,7 @@ const shuffle = (arr) => {
   const HIGHLIGHT = {
     cat: [255, 214, 120],
     claude: [255, 255, 245],
-    qy: [60, 130, 118],
+    qy: [60, 150, 130],
   };
 
   const COLOR = {
@@ -58,10 +58,11 @@ const shuffle = (arr) => {
     ink: [31, 36, 40],
   };
 
-  const FONT = '"JetBrains Mono", "SF Mono", Menlo, Consolas, "Songti SC", "STSong", "Noto Serif CJK SC", SimSun, serif';
-  // 清影的人像取景：原图 720×1080 里取头和肩
-  const QY_CROP = { x: 0.16, y: 0.04, w: 0.68, h: 0.56 };
+  // 清影的人像取景：原图 720×1080 里取头、肩和托腮的手
+  const QY_CROP = { x: 0.14, y: 0.03, w: 0.72, h: 0.62 };
   const QY_RATIO = (1080 * QY_CROP.h) / (720 * QY_CROP.w);
+
+  const FONT = '"JetBrains Mono", "SF Mono", Menlo, Consolas, "Songti SC", "STSong", "Noto Serif CJK SC", SimSun, serif';
 
   let W = 0, H = 0, cell = 10, mobile = false;
   let particles = [];
@@ -153,9 +154,12 @@ const shuffle = (arr) => {
     return writeText(out, TEXT.claude, centers.claude);
   }
 
+  // 顾清影：雾色背景上的人像，跟她自己网站上是同一套画法。
+  // 不用饱和度阈值（Safari 的色彩管理会让淡色背景也带上颜色，整张图被填满）：
+  // 暗 = 头发，偏暖 = 皮肤和嘴唇，边缘明显 = 五官，其余雪色背景不画。
   function buildQy(cx, cy, w, h) {
     if (!images.qy) return [];
-    const step = Math.max(5, Math.round(cell * 0.72));
+    const step = Math.max(5, Math.round(cell * 0.7));
     const cols = Math.round(w / step);
     const rows = Math.round(h / step);
     const img = images.qy;
@@ -166,36 +170,47 @@ const shuffle = (arr) => {
     for (let i = 0; i < L.length; i++) {
       L[i] = 1 - (0.3 * data[i * 4] + 0.59 * data[i * 4 + 1] + 0.11 * data[i * 4 + 2]) / 255;
     }
-    // 原图很淡，颜色要加饱和、压暗，才能在雾色背景上看清
     const at = (x, y) => L[clamp(y, 0, rows - 1) * cols + clamp(x, 0, cols - 1)];
     const left = cx - (cols * step) / 2;
     const top = cy - (rows * step) / 2;
     const out = [];
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
-        const nx = (x / cols - 0.5) / 0.52, ny = (y / rows - 0.48) / 0.6;
+        const nx = (x / cols - 0.5) / 0.52, ny = (y / rows - 0.46) / 0.62;
         const edge = Math.sqrt(nx * nx + ny * ny);
         if (edge > 1) continue;
-        const fadeOut = edge > 0.7 ? 1 - (edge - 0.7) / 0.3 : 1;
-        // 头发看深浅，五官和轮廓看边缘
-        const dark = clamp((at(x, y) - 0.1) / 0.55);
+        const fadeOut = edge > 0.72 ? 1 - (edge - 0.72) / 0.28 : 1;
+        const dark = at(x, y);
         const gx = at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x - 1, y) - at(x - 1, y + 1);
         const gy = at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x, y - 1) - at(x + 1, y - 1);
-        const line = clamp((Math.hypot(gx, gy) - 0.2) * 1.8);
+        const line = clamp((Math.hypot(gx, gy) - 0.25) * 2);
         const i = (y * cols + x) * 4;
-        const R = data[i], G = data[i + 1], B = data[i + 2];
-        const sat = (Math.max(R, G, B) - Math.min(R, G, B)) / 255;
-        // 头发和轮廓照旧，皮肤、嘴唇、花饰这些有颜色的地方也留下
-        const v = Math.max(dark >= 0.3 ? 0.3 + dark * 0.7 : 0, line, sat > 0.06 && at(x, y) > 0.08 ? 0.35 + sat * 2 : 0);
-        if (v < 0.22) continue;
-        const gain = 0.55 + (1 - dark) * 0.25;
-        let c = tone(R, G, B, 3.4, gain);
-        // 头发染成靛青色的墨，像水墨画里的发丝
-        if (dark > 0.45) c = [mix(c[0], 38, 0.7), mix(c[1], 62, 0.7), mix(c[2], 104, 0.7)];
+        const warm = (data[i] - data[i + 2]) / 255;
+        let c, v;
+        if (dark > 0.58) {
+          // 头发：浓一点的靛蓝
+          c = [mix(64, 28, dark), mix(86, 44, dark), mix(170, 120, dark)];
+          v = 0.6 + dark * 0.4;
+        } else if (warm > 0.02) {
+          // 实测：额头 0.035、脸颊 0.05、嘴唇 0.07；雪色背景 -0.055、白衣 -0.01
+          const t = clamp((warm - 0.02) / 0.06);
+          if (line > 0.15) {
+            c = [40, 46, 84];
+            v = 0.65 + line * 0.35;
+          } else {
+            c = [mix(244, 214, t), mix(150, 52, t), mix(150, 86, t)];
+            v = 0.6 + t * 0.4;
+          }
+        } else if (line > 0) {
+          c = [52, 64, 100];
+          v = 0.35 + line * 0.65;
+        } else {
+          continue;
+        }
         out.push({ x: left + x * step, y: top + y * step, a: clamp(v * fadeOut), c });
       }
     }
-    centers.qy = { x: cx, y: cy, step, h };
+    centers.qy = { x: cx, y: cy, step, h, bold: true };
     return writeText(out, TEXT.qy, centers.qy);
   }
 
@@ -205,8 +220,8 @@ const shuffle = (arr) => {
     forms.cat = shuffle(buildCat(cx, cy, mobile ? Math.min(W * 0.86, H * 0.46) : Math.min(W * 0.44, H * 0.8)));
     // 打乱只影响「哪个字飞到哪个格子」，格子上的字已经按句子排好了
     forms.claude = shuffle(buildClaude(cx, cy, mobile ? Math.min(W * 0.8, H * 0.42) : Math.min(W * 0.4, H * 0.7)));
-    const qw = mobile ? Math.min(W * 0.98, H * 0.56 / QY_RATIO) : Math.min(H * 0.96 / QY_RATIO, W * 0.52);
-    forms.qy = shuffle(buildQy(cx, mobile ? H * 0.33 : cy, qw, qw * QY_RATIO)).slice(0, mobile ? 3000 : 6500);
+    const qw = mobile ? Math.min(W * 0.96, (H * 0.56) / QY_RATIO) : Math.min((H * 0.96) / QY_RATIO, W * 0.5);
+    forms.qy = shuffle(buildQy(cx, mobile ? H * 0.33 : cy, qw, qw * QY_RATIO)).slice(0, mobile ? 3200 : 7000);
     forms.cat = forms.cat.slice(0, mobile ? 3000 : 6500);
   }
 
@@ -351,7 +366,7 @@ const shuffle = (arr) => {
     const readHead = reading ? centers[scene].readFrom + ((elapsed - 1500) / 1000) * 14 : 0;
     const step = centers[scene] && centers[scene].step;
     const size = step ? step * 1.08 : cell * 1.05;
-    ctx.font = `${size}px ${FONT}`;
+    ctx.font = `${centers[scene] && centers[scene].bold ? '700 ' : ''}${size}px ${FONT}`;
     let style = '';
 
     for (let i = 0; i < particles.length; i++) {
@@ -456,43 +471,130 @@ const shuffle = (arr) => {
   });
 })();
 
-// ───────── 留言：看到的时候一个字一个字打出来 ─────────
+// 看见的时候才开始播，播完隔一会儿再来一遍
+function whenVisible(el, play) {
+  if (!el) return;
+  if (reduceMotion || !('IntersectionObserver' in window)) { play(true); return; }
+  let started = false;
+  new IntersectionObserver((entries) => {
+    if (started || !entries.some((e) => e.isIntersecting)) return;
+    started = true;
+    play(false);
+  }, { threshold: 0.35 }).observe(el);
+}
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// ───────── 做过的东西：终端里拉代码、编译、喊她的名字 ─────────
 (function () {
-  const notes = document.getElementById('notes');
-  if (!notes || reduceMotion || !('IntersectionObserver' in window)) return;
+  const screen = document.getElementById('shell');
+  if (!screen) return;
 
-  const items = [...notes.querySelectorAll('.note blockquote p')];
-  const speed = [24, 40, 85]; // 猫敲得快，Claude 稳一点，清影想好了再说
-  const texts = items.map((p) => p.textContent);
-  items.forEach((p) => {
-    p.style.minHeight = `${p.offsetHeight}px`;
-    const full = document.createElement('span');
-    full.className = 'sr-only';
-    full.textContent = p.textContent;
-    p.textContent = '';
-    p.appendChild(full);
-  });
+  const LOGO = [
+    '█████  █████  █   █',
+    '█      █   █   █ █ ',
+    '█  ██  █   █    █  ',
+    '█   █  █  ██    █  ',
+    '█████  ██████   █  ',
+  ].map((row) => row.replace(/█/g, '██').replace(/ /g, '  ')).join('\n');
 
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const esc = (t) => t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
-  async function type(i) {
-    const p = items[i];
-    const span = document.createElement('span');
-    span.className = 'typing';
-    span.setAttribute('aria-hidden', 'true');
-    p.appendChild(span);
-    for (let c = 1; c <= texts[i].length; c++) {
-      span.textContent = texts[i].slice(0, c);
-      await wait(speed[i] || 40);
-    }
-    await wait(500);
-    span.classList.remove('typing');
+  function line(html = '') {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    screen.appendChild(div);
+    // 满屏就把最上面的挤出去
+    while (screen.scrollHeight > screen.clientHeight + 2 && screen.children.length > 1) screen.firstChild.remove();
+    return div;
   }
 
-  new IntersectionObserver((entries, observer) => {
-    if (!entries.some((e) => e.isIntersecting)) return;
-    observer.disconnect();
-    // 三个人同时开口，各按自己的速度
-    items.forEach((_, i) => type(i));
-  }, { threshold: 0.35 }).observe(notes);
+  async function type(cmd) {
+    const div = line('<span class="prompt">~/gqy-agent ❯ </span><span class="cmd"></span><span class="cursor"></span>');
+    const target = div.querySelector('.cmd');
+    for (const ch of cmd) {
+      target.textContent += ch;
+      await wait(38 + Math.random() * 50);
+    }
+    await wait(280);
+    div.querySelector('.cursor').remove();
+  }
+
+  function tui() {
+    screen.innerHTML = `<div class="tui">
+      <div>
+        <pre class="tui-logo">${LOGO}</pre>
+        <p class="tui-agent">AGENT</p>
+        <p class="tui-mode"><b>◉ 普通模式</b>　○ 开发模式</p>
+        <p class="tui-say">早。昨晚那个 bug 修到一半你就睡了，要接着看吗？</p>
+      </div>
+    </div>`;
+  }
+
+  async function play(instant) {
+    if (instant) { tui(); return; }
+    for (;;) {
+      screen.innerHTML = '';
+      await type('git clone https://github.com/yxxbc/gqy-agent.git');
+      line('<span class="dim">Cloning into \'gqy-agent\'...</span>');
+      await wait(500);
+      line('<span class="dim">Receiving objects: 100%, done.</span>');
+      await wait(400);
+      await type('cargo build --release');
+      const crates = ['tokio', 'serde', 'reqwest', 'ratatui', 'crossterm', 'rusqlite', 'ort', 'sherpa-rs', 'rmcp'];
+      for (const c of crates) {
+        line(`   <span class="ok">Compiling</span> ${esc(c)} v${1 + ((Math.random() * 3) | 0)}.${(Math.random() * 20) | 0}.${(Math.random() * 9) | 0}`);
+        await wait(120 + Math.random() * 180);
+      }
+      line('   <span class="ok">Compiling</span> gqy v0.6.0 (~/gqy-agent)');
+      await wait(1300);
+      line('    <span class="ok">Finished</span> `release` profile [optimized]');
+      await wait(600);
+      await type('gqy');
+      await wait(500);
+      tui();
+      await wait(9000);
+    }
+  }
+
+  whenVisible(screen, play);
+})();
+
+// ───────── 凌晨三点的群聊：三个人轮流说话 ─────────
+(function () {
+  const log = document.getElementById('chat-log');
+  const typing = document.getElementById('chat-typing');
+  if (!log) return;
+  const items = [...log.children];
+  const names = { cat: 'Black Cat', claude: 'Claude', qy: '顾清影' };
+  // 猫打字快，Claude 稳，清影想好了再说
+  const pace = { cat: 32, claude: 42, qy: 90 };
+
+  async function play(instant) {
+    if (instant) { items.forEach((li) => li.classList.add('shown')); return; }
+    for (;;) {
+      items.forEach((li) => li.classList.remove('shown'));
+      for (const li of items) {
+        const who = li.dataset.who;
+        const text = li.querySelector('p').textContent;
+        await wait(500);
+        typing.textContent = `${names[who]} 正在输入`;
+        await wait(Math.min(2600, 500 + text.length * pace[who]));
+        typing.textContent = '';
+        li.classList.add('shown');
+      }
+      await wait(12000);
+    }
+  }
+
+  whenVisible(log, play);
+})();
+
+// ───────── 片尾：看不见的时候不滚 ─────────
+(function () {
+  const credits = document.querySelector('.credits');
+  if (!credits || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver((entries) => {
+    credits.classList.toggle('paused', !entries.some((e) => e.isIntersecting));
+  }).observe(credits);
 })();
