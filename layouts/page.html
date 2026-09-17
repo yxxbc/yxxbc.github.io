@@ -1,0 +1,50 @@
+{{- define "main" }}
+{{- $isPost := eq .Section "post" }}
+{{- $toc := and $isPost (gt .WordCount 600) (strings.Contains .TableOfContents "<li>") }}
+<article class="wrap article{{ if $toc }} has-toc{{ end }}">
+  <header class="article-head">
+    {{- if $isPost }}
+    <div class="meta">
+      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006年1月2日" }}</time>
+      <span>约 {{ .ReadingTime }} 分钟</span>
+      {{- range (.GetTerms "categories") }}
+      <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+      {{- end }}
+    </div>
+    {{- end }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+  </header>
+
+  {{- if $toc }}
+  <aside class="toc">
+    <details open>
+      <summary>目录</summary>
+      {{ .TableOfContents }}
+    </details>
+  </aside>
+  {{- end }}
+
+  <div class="prose">
+    {{ .Content }}
+  </div>
+
+  {{- if $isPost }}
+  <footer class="article-foot">
+    {{- with .GetTerms "tags" }}
+    <div class="tags">
+      {{- range . }}<a href="{{ .RelPermalink }}">#{{ .LinkTitle }}</a>{{ end }}
+    </div>
+    {{- end }}
+    <nav class="pager" aria-label="上一篇和下一篇">
+      {{- with .PrevInSection }}
+      <a class="pager-next" href="{{ .RelPermalink }}"><span>← 较新</span>{{ .Title }}</a>
+      {{- end }}
+      {{- with .NextInSection }}
+      <a class="pager-prev" href="{{ .RelPermalink }}"><span>较早 →</span>{{ .Title }}</a>
+      {{- end }}
+    </nav>
+  </footer>
+  {{- end }}
+</article>
+{{- end }}

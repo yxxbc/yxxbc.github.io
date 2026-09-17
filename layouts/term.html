@@ -1,0 +1,14 @@
+{{- define "main" }}
+<div class="wrap narrow">
+  <header class="page-head">
+    <p class="crumb"><a href="{{ .Parent.RelPermalink }}">{{ .Parent.Title }}</a></p>
+    <h1>{{ if eq .Data.Plural "tags" }}#{{ end }}{{ .Title }}</h1>
+    <p>共 {{ len .Pages }} 篇</p>
+  </header>
+  <div class="post-list">
+    {{- range .Pages.ByDate.Reverse }}
+    {{- partial "post-item.html" . }}
+    {{- end }}
+  </div>
+</div>
+{{- end }}

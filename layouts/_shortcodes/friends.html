@@ -1,0 +1,13 @@
+<ul class="friends">
+  {{- range hugo.Data.friends }}
+  <li>
+    <a href="{{ .url }}" target="_blank" rel="noopener">
+      <span class="friend-avatar" aria-hidden="true">{{ substr .name 0 1 }}{{ with .avatar }}<img src="{{ . }}" alt="" width="56" height="56" loading="lazy" onerror="this.remove()">{{ end }}</span>
+      <span class="friend-text">
+        <strong>{{ .name }}</strong>
+        <span>{{ .description }}</span>
+      </span>
+    </a>
+  </li>
+  {{- end }}
+</ul>

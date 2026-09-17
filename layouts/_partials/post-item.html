@@ -1,0 +1,19 @@
+{{- /* 文章列表里的一条 */ -}}
+<article class="post-item">
+  <a class="post-item-link" href="{{ .RelPermalink }}">
+    <div class="post-item-text">
+      <h3>{{ .Title }}</h3>
+      {{- with .Description }}
+      <p>{{ . }}</p>
+      {{- end }}
+      <div class="meta">
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
+        {{- with .Params.categories }}<span>{{ delimit . " / " }}</span>{{ end }}
+      </div>
+    </div>
+    {{- with partial "cover.html" . }}
+    {{- $thumb := .Fill "320x220 webp q80 Smart" }}
+    <img class="post-item-cover" src="{{ $thumb.RelPermalink }}" width="160" height="110" alt="" loading="lazy">
+    {{- end }}
+  </a>
+</article>

@@ -1,9 +1,6 @@
 ---
-title: "朋友们"
-description: "人心有反复，好在山水有重逢。"
-type: "page"
-layout: "list"
-comments: false
+title: 友链
+description: 人心有反复，好在山水有重逢。
 ---
 
 {{< friends >}}

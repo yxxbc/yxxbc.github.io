@@ -1,0 +1,7 @@
+{{- /* 返回文章封面资源（front matter 里的 cover.image 或 image），没有则返回空 */ -}}
+{{- $src := or .Params.cover.image .Params.image }}
+{{- $img := "" }}
+{{- with $src }}
+  {{- $img = $.Resources.Get . }}
+{{- end }}
+{{- return $img }}

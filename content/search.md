@@ -1,6 +1,5 @@
 ---
-title: "搜索"
-layout: "search"
-type: "page"
-description: "搜索文章"
+title: 搜索
+layout: search
+description: 搜索文章
 ---

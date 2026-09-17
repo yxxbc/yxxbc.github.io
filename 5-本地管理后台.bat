@@ -1,3 +1,0 @@
-@echo off
-echo Starting Black Cat Blog Local Admin...
-python localserver/server.py

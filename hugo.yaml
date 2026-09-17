@@ -1,107 +1,65 @@
-baseURL: https://yxxbc.github.io
+baseURL: https://yxxbc.github.io/
 locale: zh-cn
 defaultContentLanguage: zh-cn
 hasCJKLanguage: true
-title: "Black Cat's Blog"
-theme: PaperMod
+title: Black Cat
+enableRobotsTXT: true
+capitalizeListTitles: false
 
 outputs:
-  home:
-    - HTML
-    - RSS
-    - JSON
-
+  home: [HTML, RSS, JSON]
+  section: [HTML, RSS]
+  taxonomy: [HTML]
+  term: [HTML]
 
 outputFormats:
-  JSON:
-    mediaType: application/json
-    baseName: index
-    isPlainText: true
   RSS:
-    mediaType: application/rss+xml
     baseName: rss
 
-pagination:
-  pagerSize: 10
+services:
+  rss:
+    limit: 20
 
 permalinks:
-  post: /p/:slug/
-  page: /:slug/
+  page:
+    post: /p/:slug/
 
-params:
-  ShowCodeCopyButtons: true
-  disableSpecial1stPost: true
-  profileMode:
-    enabled: true
-    title: Black Cat
-    subtitle: 生命不止，折腾不息<br>Life goes on, and so does the struggle.
-    imageUrl: /img/avatar.png
-    imageTitle: "Black Cat"
-    imageWidth: 120
-    imageHeight: 120
-
-  socialIcons:
-    - name: github
-      url: https://github.com/yxxbc
-    - name: email
-      url: mailto:xynrin@163.com
-    - name: bilibili
-      url: https://space.bilibili.com/1198508132
-    - name: rss
-      url: /rss.xml
-
-  mainSections:
-    - post
-  featuredImageField: image
-  rssFullContent: true
-  ShowRssButtonInSectionTermList: false
-  favicon: img/favicon.png
-  assets:
-    favicon: img/favicon.png
-  description: "Black Cat 的个人博客，记录技术折腾与日常思考。"
-
-  DateFormat: "2006年01月02日"
-
-  analytics:
-    google:
-      SiteVerificationTag: "2dTPklx6cOydPSINuCHxypLaCezdhnuyPBVY7rd189s"
-
-  disableThemeToggle: false
-  defaultTheme: auto
-
-  cover:
-    hiddenInList: true
-    hiddenInSingle: true
+taxonomies:
+  category: categories
+  tag: tags
 
 markup:
   goldmark:
+    parser:
+      wrapStandAloneImageWithinParagraph: false
     renderer:
       unsafe: true
   highlight:
     noClasses: false
-    codeFences: true
+    lineNos: false
     guessSyntax: true
-    lineNoStart: 1
-    lineNos: true
-    lineNumbersInTable: true
     tabWidth: 4
+  tableOfContents:
+    startLevel: 2
+    endLevel: 3
 
-menu:
+params:
+  description: Black Cat 的博客，记录技术折腾与日常思考。
+  subtitle: 生命不止，折腾不息
+  github: https://github.com/yxxbc
+  googleSiteVerification: 2dTPklx6cOydPSINuCHxypLaCezdhnuyPBVY7rd189s
+
+menus:
   main:
-    - identifier: post
-      name: 文章
-      url: /post/
+    - name: 文章
+      pageRef: /post
       weight: 10
-    - identifier: about
-      name: 关于
-      url: /about/
+    - name: 分类
+      pageRef: /categories
       weight: 20
-    - identifier: friends
-      name: 友链
-      url: /friends/
-      weight: 25
-    - identifier: search
-      name: 搜索
-      url: /search/
+    - name: 友链
+      pageRef: /friends
       weight: 30
-
+    - name: 关于
+      pageRef: /about
+      weight: 40

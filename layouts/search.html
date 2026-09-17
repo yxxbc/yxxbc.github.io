@@ -1,0 +1,12 @@
+{{- define "main" }}
+<div class="wrap narrow">
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+  </header>
+  <div class="search" data-index="{{ "index.json" | relURL }}">
+    <input id="search-input" type="search" placeholder="搜标题、简介或正文…" autocomplete="off" aria-label="搜索文章">
+    <p id="search-status" class="search-status" aria-live="polite"></p>
+    <div id="search-results" class="post-list"></div>
+  </div>
+</div>
+{{- end }}

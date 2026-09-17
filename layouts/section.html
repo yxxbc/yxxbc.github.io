@@ -1,0 +1,25 @@
+{{- define "main" }}
+<div class="wrap narrow">
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+    {{- with .Description }}<p>{{ . }}</p>{{ end }}
+  </header>
+
+  {{- with .Content }}
+  <div class="prose">{{ . }}</div>
+  {{- end }}
+
+  {{- if .RegularPages }}
+  {{- range .RegularPages.GroupByDate "2006" }}
+  <section class="year">
+    <h2 class="year-title">{{ .Key }} <span>{{ len .Pages }} 篇</span></h2>
+    <div class="post-list">
+      {{- range .Pages }}
+      {{- partial "post-item.html" . }}
+      {{- end }}
+    </div>
+  </section>
+  {{- end }}
+  {{- end }}
+</div>
+{{- end }}
