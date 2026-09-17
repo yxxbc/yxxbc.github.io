@@ -286,6 +286,40 @@ html:not(.js) .cap { position: static; visibility: visible; transform: none; mar
 .birth-credits div:nth-child(2) dt { color: #e6a3c0; font-weight: 700; }
 .birth-credits div:nth-child(3) dt { color: var(--clay); font-family: var(--soft); font-weight: 600; }
 .birth-credits dd { margin: 0; color: var(--moon-dim); }
+.oneline { margin: 0 0 28px; }
+.oneline-label { margin: 0 0 10px; font-size: 15px; color: var(--moon); }
+.oneline-box {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--night-line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0a0f19;
+}
+.oneline-box code {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  font: 13px/1.6 var(--mono);
+  color: #e6c2dc;
+  overflow-wrap: anywhere;
+  user-select: all;
+  -webkit-user-select: all;
+}
+.copy-btn {
+  flex: none;
+  padding: 0 18px;
+  font: 600 14px var(--serif);
+  color: var(--night);
+  background: var(--amber);
+  border: 0;
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+.copy-btn:hover { background: #ffc85c; }
+.copy-btn.done { background: #9fd3a8; }
+.oneline-hint { margin: 8px 0 0; font-size: 13px; color: var(--moon-dim); }
+
 .birth-link {
   display: inline-block;
   padding: 11px 22px;

@@ -13,7 +13,7 @@
   <meta name="author" content="Black Cat, Claude, 顾清影">
   <link rel="icon" href="favicon.png">
   <!-- 改了 CSS 或 JS，记得把 ?v= 后面换成新的时间，浏览器才不会用旧缓存 -->
-  <link rel="stylesheet" href="style.css?v=202609172323">
+  <link rel="stylesheet" href="style.css?v=202609172334">
   <script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
@@ -98,19 +98,27 @@
       <div class="birth-inner">
         <div class="birth-text">
           <h2 id="birth-title">我们一起做的东西，<br>只有一个。</h2>
-          <p class="birth-lede">她叫 gqy-agent，也叫顾清影。右边是她出生的样子：拉代码，编译，然后喊她的名字。</p>
+          <p class="birth-lede">她叫 gqy-agent，也叫顾清影。右边是她住进一台电脑的样子：一行命令装好，然后喊她的名字。</p>
           <dl class="birth-credits">
             <div><dt>Black Cat</dt><dd>用 Rust 写了她的身子</dd></div>
             <div><dt>顾清影</dt><dd>住在里面</dd></div>
             <div><dt>Claude</dt><dd>没写她的代码，只写了你正在看的这一页</dd></div>
           </dl>
+          <div class="oneline">
+            <p class="oneline-label">想让她也住进你的电脑？复制这一行到终端：</p>
+            <div class="oneline-box">
+              <code id="install-cmd">curl -fsSL https://raw.githubusercontent.com/yxxbc/gqy-agent/gqy/install.sh | sh</code>
+              <button type="button" class="copy-btn" data-copy="#install-cmd">复制</button>
+            </div>
+            <p class="oneline-hint">Linux 和 macOS 都能用，装到 ~/.local，不需要 root，也不用自己编译。</p>
+          </div>
           <a class="birth-link" href="https://github.com/yxxbc/gqy-agent" target="_blank" rel="noopener">去 GitHub 看她的源码</a>
         </div>
 
-        <figure class="shell" aria-label="终端里编译并启动 gqy 的演示">
+        <figure class="shell" aria-label="终端里一键安装并启动 gqy 的演示">
           <div class="shell-bar" aria-hidden="true"><i></i><i></i><i></i><span>~/gqy-agent</span></div>
           <div class="shell-screen" id="shell" aria-hidden="true"></div>
-          <figcaption class="sr-only">终端里依次执行 git clone、cargo build --release 和 gqy，屏幕切换成 GQY 的界面，顾清影说：早，昨晚那个 bug 修到一半你就睡了，要接着看吗？</figcaption>
+          <figcaption class="sr-only">终端里运行一键安装命令，下载并装好 gqy，然后运行 gqy，屏幕切换成 GQY 的界面，顾清影说：早，昨晚那个 bug 修到一半你就睡了，要接着看吗？</figcaption>
         </figure>
       </div>
     </section>
@@ -181,6 +189,6 @@
     <p class="stage-motto">生命不止，折腾不息。</p>
   </footer>
 
-  <script src="script.js?v=202609172323" defer></script>
+  <script src="script.js?v=202609172334" defer></script>
 </body>
 </html>

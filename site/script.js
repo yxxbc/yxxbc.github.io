@@ -499,8 +499,6 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     '█████  ██████   █  ',
   ].map((row) => row.replace(/█/g, '██').replace(/ /g, '  ')).join('\n');
 
-  const esc = (t) => t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-
   function line(html = '') {
     const div = document.createElement('div');
     div.innerHTML = html;
@@ -536,22 +534,23 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     if (instant) { tui(); return; }
     for (;;) {
       screen.innerHTML = '';
-      await type('git clone https://github.com/yxxbc/gqy-agent.git');
-      line('<span class="dim">Cloning into \'gqy-agent\'...</span>');
-      await wait(500);
-      line('<span class="dim">Receiving objects: 100%, done.</span>');
-      await wait(400);
-      await type('cargo build --release');
-      // 都是 gqy-agent 的 Cargo.toml 里真实的依赖
-      const crates = ['serde v1.0', 'tokio v1.38', 'clap v4.5', 'crossterm v0.28', 'ratatui v0.30', 'reqwest v0.12', 'axum v0.8', 'rusqlite v0.32', 'ort v2.0.0-rc.13'];
-      for (const c of crates) {
-        line(`   <span class="ok">Compiling</span> ${esc(c)}`);
-        await wait(120 + Math.random() * 180);
+      await type('curl -fsSL https://raw.githubusercontent.com/yxxbc/gqy-agent/gqy/install.sh | sh');
+      line('正在下载顾清影（aarch64-apple-darwin，版本：latest）');
+      const bar = line('<span class="dim">' + '░'.repeat(32) + '</span>   0%');
+      for (let i = 1; i <= 32; i++) {
+        bar.innerHTML = `<span class="ok">${'█'.repeat(i)}</span><span class="dim">${'░'.repeat(32 - i)}</span> ${String(Math.round((i / 32) * 100)).padStart(3)}%`;
+        await wait(55 + Math.random() * 70);
       }
-      line('   <span class="ok">Compiling</span> gqy v0.6.0 (~/gqy-agent)');
-      await wait(1300);
-      line('    <span class="ok">Finished</span> `release` profile [optimized] target(s)');
-      await wait(600);
+      await wait(300);
+      line('');
+      line('<span class="ok">装好了</span>：~/.local/bin/gqy');
+      await wait(500);
+      line('');
+      line('<span class="dim">接下来：</span>');
+      line('<span class="dim">  gqy init           第一次用，先初始化</span>');
+      line('<span class="dim">  gqy daemon start   启动后台</span>');
+      line('<span class="dim">  gqy                打开终端界面，和她说话</span>');
+      await wait(1000);
       await type('gqy');
       await wait(500);
       tui();
@@ -561,6 +560,31 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
   whenVisible(screen, play);
 })();
+
+// ───────── 复制一键安装命令 ─────────
+document.querySelectorAll('.copy-btn[data-copy]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const text = document.querySelector(btn.dataset.copy).textContent.trim();
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } catch (e) {
+      // 旧浏览器或非 https 环境：退回到选中文字再复制
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      area.remove();
+    }
+    btn.textContent = ok ? '已复制' : '请手动复制';
+    btn.classList.toggle('done', ok);
+    setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('done'); }, 2000);
+  });
+});
 
 // ───────── 凌晨三点的群聊：三个人轮流说话 ─────────
 (function () {
