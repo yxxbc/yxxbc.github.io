@@ -592,11 +592,158 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   whenVisible(log, play);
 })();
 
-// ───────── 片尾：看不见的时候不滚 ─────────
+// ───────── 片尾：谢幕 ─────────
 (function () {
-  const credits = document.querySelector('.credits');
-  if (!credits || !('IntersectionObserver' in window)) return;
-  new IntersectionObserver((entries) => {
-    credits.classList.toggle('paused', !entries.some((e) => e.isIntersecting));
-  }).observe(credits);
+  const call = document.getElementById('curtain-call');
+  const stage = document.getElementById('stage');
+  if (!call || !stage) return;
+  const actors = [...stage.querySelectorAll('.actor')];
+  const COLORS = { cat: ['#f2b33d', '#8fd3c8', '#dfe3ea'], claude: ['#e2865f', '#ffd3b0', '#f6efe3'], qy: ['#9fb4ff', '#f3c7c2', '#e8f2ee'] };
+
+  const setSpot = (x, y) => {
+    stage.style.setProperty('--sx', `${x}px`);
+    stage.style.setProperty('--sy', `${y}px`);
+  };
+  const centerOf = (actor) => {
+    const s = stage.getBoundingClientRect();
+    const r = actor.querySelector('.actor-face').getBoundingClientRect();
+    return [r.left - s.left + r.width / 2, r.top - s.top + r.height / 2];
+  };
+
+  // 从头像里撒出几片字
+  function petals(actor, count = 14) {
+    if (reduceMotion) return;
+    const chars = [...actor.dataset.chars];
+    const colors = COLORS[actor.dataset.actor];
+    const [cx, cy] = centerOf(actor);
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('span');
+      el.className = 'petal';
+      el.textContent = pick(chars);
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.4;
+      const dist = 80 + Math.random() * 140;
+      el.style.setProperty('--x', `${cx}px`);
+      el.style.setProperty('--y', `${cy}px`);
+      el.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+      el.style.setProperty('--dy', `${Math.sin(angle) * dist + 60}px`);
+      el.style.setProperty('--r', `${(Math.random() - 0.5) * 360}deg`);
+      el.style.setProperty('--size', `${12 + Math.random() * 12}px`);
+      el.style.setProperty('--c', pick(colors));
+      el.style.setProperty('--t', `${1.4 + Math.random() * 0.9}s`);
+      stage.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+
+  // 鞠躬、说一句话、撒花
+  function bow(actor, withLine = true) {
+    actor.classList.remove('bow');
+    void actor.offsetWidth;
+    actor.classList.add('bow');
+    petals(actor);
+    if (withLine) {
+      actors.forEach((a) => a !== actor && a.classList.remove('talk'));
+      actor.classList.add('talk');
+      clearTimeout(actor._talk);
+      actor._talk = setTimeout(() => actor.classList.remove('talk'), 2600);
+    }
+    setTimeout(() => actor.classList.remove('bow'), 1300);
+  }
+
+  function light(actor) {
+    actors.forEach((a) => a.classList.toggle('lit', a === actor));
+  }
+
+  // 三个人的头转向光
+  function lookAt(x) {
+    actors.forEach((a) => {
+      const [cx] = centerOf(a);
+      const turn = Math.max(-28, Math.min(28, (x - cx) / 12));
+      a.querySelector('.actor-face').style.setProperty('--turn', `${turn}deg`);
+    });
+  }
+
+  // ── 没人操作时：追光自己在三个人之间走，轮流鞠躬，最后一起鞠躬 ──
+  let following = false;
+  let resumeAt = 0;
+  let touring = false;
+
+  async function tour() {
+    if (touring) return;
+    touring = true;
+    await wait(2200);
+    for (;;) {
+      for (const actor of actors) {
+        while (following || performance.now() < resumeAt || document.hidden) await wait(300);
+        const [x, y] = centerOf(actor);
+        setSpot(x, y);
+        lookAt(x);
+        light(actor);
+        await wait(700);
+        if (following) continue;
+        bow(actor);
+        await wait(2800);
+      }
+      if (following) continue;
+      // 一起谢幕
+      const s = stage.getBoundingClientRect();
+      const [, y] = centerOf(actors[1]);
+      setSpot(s.width / 2, y);
+      lookAt(s.width / 2);
+      actors.forEach((a) => a.classList.add('lit'));
+      await wait(600);
+      actors.forEach((a, i) => setTimeout(() => bow(a, false), i * 140));
+      await wait(4200);
+    }
+  }
+
+  // ── 交互：光跟着鼠标走，点头像让他鞠躬 ──
+  stage.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'touch' || reduceMotion) return;
+    const s = stage.getBoundingClientRect();
+    const x = e.clientX - s.left, y = e.clientY - s.top;
+    following = true;
+    stage.classList.add('follow');
+    setSpot(x, y);
+    lookAt(x);
+    // 离光最近的人亮起来
+    let nearest = null, best = Infinity;
+    actors.forEach((a) => {
+      const [cx, cy] = centerOf(a);
+      const d = Math.hypot(cx - x, cy - y);
+      if (d < best) { best = d; nearest = a; }
+    });
+    light(best < 160 ? nearest : null);
+  });
+  stage.addEventListener('pointerleave', () => {
+    following = false;
+    stage.classList.remove('follow');
+    resumeAt = performance.now() + 2500;
+  });
+
+  actors.forEach((actor) => {
+    actor.querySelector('.actor-face').addEventListener('click', () => {
+      call.classList.add('touched');
+      const [x, y] = centerOf(actor);
+      if (!following) {
+        setSpot(x, y);
+        lookAt(x);
+        light(actor);
+        resumeAt = performance.now() + 5000;
+      }
+      bow(actor);
+    });
+  });
+
+  // ── 滚到这里时拉开幕布 ──
+  const open = () => {
+    call.classList.add('open');
+    if (!reduceMotion) tour();
+  };
+  if (!('IntersectionObserver' in window)) { open(); return; }
+  new IntersectionObserver((entries, observer) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    observer.disconnect();
+    open();
+  }, { threshold: 0.35 }).observe(stage);
 })();

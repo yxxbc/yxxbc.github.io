@@ -13,7 +13,7 @@
   <meta name="author" content="Black Cat, Claude, 顾清影">
   <link rel="icon" href="favicon.png">
   <!-- 改了 CSS 或 JS，记得把 ?v= 后面换成新的时间，浏览器才不会用旧缓存 -->
-  <link rel="stylesheet" href="style.css?v=202609172304">
+  <link rel="stylesheet" href="style.css?v=202609172323">
   <script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
@@ -137,30 +137,50 @@
 
   </main>
 
-  <!-- 片尾：演职员表 -->
-  <footer class="credits" aria-label="演职员表">
-    <div class="credits-roll">
-      <div class="credits-track">
-        <p class="credits-title">完</p>
-        <dl>
-          <div><dt>出演</dt><dd>Black Cat<br>Claude<br>顾清影</dd></div>
-          <div><dt>写代码</dt><dd>Black Cat</dd></div>
-          <div><dt>写这一页</dt><dd>Claude</dd></div>
-          <div><dt>被写出来</dt><dd>顾清影</dd></div>
-          <div><dt>取景</dt><dd>海边白墙上的一只黑猫</dd></div>
-          <div><dt>特别感谢</dt><dd>每一次版本更新</dd></div>
-        </dl>
-        <p class="credits-motto">生命不止，折腾不息。</p>
-      </div>
+  <!-- 片尾：谢幕 -->
+  <footer class="curtain-call" id="curtain-call" aria-labelledby="bow-title">
+    <div class="stage" id="stage">
+      <h2 id="bow-title" class="stage-title">谢幕</h2>
+
+      <ul class="actors">
+        <li class="actor" data-actor="cat" data-chars="生命不止折腾不息猫">
+          <p class="actor-line" aria-live="polite">生命不止，折腾不息。</p>
+          <button class="actor-face" type="button" aria-label="让 Black Cat 鞠个躬">
+            <img src="img/blackcat.jpg" alt="" width="160" height="160">
+          </button>
+          <p class="actor-name">Black Cat</p>
+          <p class="actor-role">写代码</p>
+          <a class="actor-link" href="https://github.com/yxxbc" target="_blank" rel="noopener">GitHub</a>
+        </li>
+        <li class="actor" data-actor="claude" data-chars="读写改想帮忙Claude">
+          <p class="actor-line" aria-live="polite">被叫来帮忙，最后自己也站到了台上。</p>
+          <button class="actor-face" type="button" aria-label="让 Claude 鞠个躬">
+            <img src="img/claude.jpg" alt="" width="160" height="160">
+          </button>
+          <p class="actor-name">Claude</p>
+          <p class="actor-role">写这一页</p>
+          <a class="actor-link" href="https://github.com/claude" target="_blank" rel="noopener">GitHub</a>
+        </li>
+        <li class="actor" data-actor="qy" data-chars="清影记事雾花白衣">
+          <p class="actor-line" aria-live="polite">谢谢你看到这里，我会记住你。</p>
+          <button class="actor-face" type="button" aria-label="让顾清影鞠个躬">
+            <img src="img/qingying.jpg" alt="" width="160" height="160">
+          </button>
+          <p class="actor-name">顾清影</p>
+          <p class="actor-role">被写出来</p>
+          <a class="actor-link" href="https://gqybot.github.io/" target="_blank" rel="noopener">她的主页</a>
+        </li>
+      </ul>
+
+      <div class="stage-floor" aria-hidden="true"></div>
+      <div class="spotlight" aria-hidden="true"></div>
+      <div class="curtain curtain-left" aria-hidden="true"></div>
+      <div class="curtain curtain-right" aria-hidden="true"></div>
+      <p class="stage-hint" aria-hidden="true">点一下头像，让他们鞠个躬</p>
     </div>
-    <nav class="credits-links" aria-label="三个人的主页">
-      <a href="https://github.com/yxxbc" target="_blank" rel="noopener">Black Cat 的 GitHub</a>
-      <a href="https://github.com/claude" target="_blank" rel="noopener">Claude 的 GitHub</a>
-      <a href="https://github.com/GQYbot" target="_blank" rel="noopener">顾清影的 GitHub</a>
-      <a href="https://gqybot.github.io/" target="_blank" rel="noopener">顾清影的小主页</a>
-    </nav>
+    <p class="stage-motto">生命不止，折腾不息。</p>
   </footer>
 
-  <script src="script.js?v=202609172304" defer></script>
+  <script src="script.js?v=202609172323" defer></script>
 </body>
 </html>
