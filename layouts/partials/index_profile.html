@@ -1,0 +1,19 @@
+{{- /* 覆盖 PaperMod 默认全屏居中 profileMode，防止刷新闪现旧版全屏大 Banner */ -}}
+<div class="home-intro" aria-label="关于作者">
+    {{- with site.Params.profileMode }}
+    {{- if .imageUrl }}
+    <div class="home-avatar-frame">
+        <img class="home-avatar-img" draggable="false" src="{{ .imageUrl | relURL }}" alt="{{ .imageTitle | default site.Title }}" width="64" height="64" decoding="async">
+    </div>
+    {{- end }}
+    <div class="home-intro-text">
+        <h1 class="home-author-name">{{ .title | default site.Title }}</h1>
+        {{- with .subtitle }}
+        <p class="home-author-motto">{{ . | safeHTML }}</p>
+        {{- end }}
+        <div class="home-socials">
+            {{- partial "social_icons.html" -}}
+        </div>
+    </div>
+    {{- end }}
+</div>
