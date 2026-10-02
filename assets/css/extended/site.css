@@ -31,6 +31,8 @@
     --accent: #b23b23;
     --accent-hover: #c9472d;
     --accent-soft: rgba(178, 59, 35, 0.09);
+    --link-card-bg: #eee6d7;
+    --link-card-border: #d2bfa2;
     --nav-bg: rgba(247, 244, 238, 0.85);
     --nav-border: rgba(223, 216, 204, 0.9);
     --shadow-float: 0 8px 30px rgba(30, 28, 25, 0.07);
@@ -53,6 +55,8 @@
     --accent: #e58d72;
     --accent-hover: #f0a28b;
     --accent-soft: rgba(229, 141, 114, 0.15);
+    --link-card-bg: #2b2621;
+    --link-card-border: #55473b;
     --nav-bg: rgba(26, 24, 22, 0.88);
     --nav-border: rgba(61, 56, 49, 0.9);
     --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -146,6 +150,64 @@ code, pre, kbd, samp {
     overflow: visible;
     line-height: 1.7;
     font-size: 0.9em;
+}
+
+.post-content a.link-card,
+.md-content a.link-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 1.25rem 0;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--link-card-border);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    background: var(--link-card-bg);
+    color: var(--content);
+    text-decoration: none;
+    box-shadow: var(--shadow-float);
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.post-content a.link-card:hover,
+.md-content a.link-card:hover {
+    background: var(--tertiary);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.link-card-title {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.link-card-desc {
+    color: var(--content);
+    font-size: 0.88em;
+    line-height: 1.6;
+}
+
+.link-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--secondary);
+    font-family: var(--font-sans);
+    font-size: 0.78em;
+}
+
+.link-card-img {
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+    border-radius: 7px;
+}
+
+.link-card-logo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
 }
 
 /* ==========================================================================
