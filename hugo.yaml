@@ -1,0 +1,103 @@
+baseURL: "/"
+locale: zh-cn
+defaultContentLanguage: zh-cn
+hasCJKLanguage: true
+title: "Black Cat's Blog"
+theme: PaperMod
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+
+outputFormats:
+  JSON:
+    mediaType: application/json
+    baseName: index
+    isPlainText: true
+  RSS:
+    mediaType: application/rss+xml
+    baseName: rss
+
+pagination:
+  pagerSize: 10
+
+permalinks:
+  post: /p/:slug/
+  page: /:slug/
+
+params:
+  ShowToc: true
+  TocOpen: true
+  ShowCodeCopyButtons: true
+  disableSpecial1stPost: true
+  profileMode:
+    enabled: true
+    title: Black Cat
+    subtitle: 生命不止，折腾不息<br>Life goes on, and so does the struggle.
+    imageUrl: /img/avatar.png
+    imageTitle: "Black Cat"
+    imageWidth: 120
+    imageHeight: 120
+
+  socialIcons:
+    - name: github
+      url: https://github.com/yxxbc
+    - name: rss
+      url: /rss.xml
+
+  mainSections:
+    - post
+  featuredImageField: image
+  rssFullContent: true
+  ShowRssButtonInSectionTermList: false
+  favicon: /favicon.png
+  assets:
+    favicon: /favicon.png
+    favicon16x16: /favicon.png
+    favicon32x32: /favicon.png
+    apple_touch_icon: /favicon.png
+  description: "Black Cat 的个人博客，记录技术折腾与日常思考。"
+
+  DateFormat: "2006年01月02日"
+
+  analytics:
+    google:
+      SiteVerificationTag: "2dTPklx6cOydPSINuCHxypLaCezdhnuyPBVY7rd189s"
+
+  disableThemeToggle: false
+  defaultTheme: auto
+
+  cover:
+    hiddenInList: true
+    hiddenInSingle: true
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    codeFences: true
+    noClasses: false
+    guessSyntax: true
+    lineNos: false
+    lineNumbersInTable: false
+    tabWidth: 4
+
+menu:
+  main:
+    - identifier: post
+      name: 文章
+      url: /post/
+      weight: 10
+    - identifier: tags
+      name: 标签
+      url: /tags/
+      weight: 20
+    - identifier: search
+      name: 搜索
+      url: /search/
+      weight: 30
+
